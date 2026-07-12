@@ -23,10 +23,10 @@ const ROUTE_SECTION = {
 
 // ── RBAC permission matrix (copy of lib/permissions.js — edge cannot import) ─
 const PERMISSIONS = {
-  FLEET_MANAGER:     { dashboard:"view", fleet:"edit",  drivers:"edit",  trips:null,    fuel:null,    analytics:"edit",  settings:"view", maintenance:"edit"  },
-  DISPATCHER:        { dashboard:"view", fleet:"view",  drivers:null,    trips:"edit",  fuel:null,    analytics:null,    settings:"view", maintenance:"view"  },
+  FLEET_MANAGER:     { dashboard:"view", fleet:"edit",  drivers:"edit",  trips:"edit",  fuel:"edit",  analytics:"edit",  settings:"view", maintenance:"edit"  },
+  DISPATCHER:        { dashboard:"view", fleet:"view",  drivers:null,    trips:"edit",  fuel:null,    analytics:null,    settings:"view", maintenance:null    },
   SAFETY_OFFICER:    { dashboard:"view", fleet:null,    drivers:"edit",  trips:"view",  fuel:null,    analytics:null,    settings:"view", maintenance:null    },
-  FINANCIAL_ANALYST: { dashboard:"view", fleet:"view",  drivers:null,    trips:null,    fuel:"edit",  analytics:"edit",  settings:"view", maintenance:"view"  },
+  FINANCIAL_ANALYST: { dashboard:"view", fleet:"view",  drivers:null,    trips:null,    fuel:"edit",  analytics:"edit",  settings:"view", maintenance:null    },
 };
 
 function canAccess(role, section) {
