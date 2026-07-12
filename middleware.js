@@ -1,10 +1,13 @@
+// middleware.js
+// Verifies Supabase session on every protected request.
+// Forwards x-user-id / x-user-role headers to route handlers.
+
 import { NextResponse } from "next/server";
-import { verifyToken, extractToken } from "@/lib/auth";
+import { createClient } from "@supabase/supabase-js";
 
-// Routes that don't require authentication
-const PUBLIC_ROUTES = ["/login", "/api/auth/login"];
+const PUBLIC_ROUTES = ["/login", "/api/auth"];
 
-// Role-based route access control
+// Role-based page access
 const ROLE_ACCESS = {
   "/fleet":       ["FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER"],
   "/drivers":     ["FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER"],
@@ -15,68 +18,69 @@ const ROLE_ACCESS = {
   "/settings":    ["FLEET_MANAGER"],
 };
 
-export function middleware(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
-  if (PUBLIC_ROUTES.some((r) => pathname.startsWith(r))) {
+  // Allow public routes and Next.js internals
+  if (
+    PUBLIC_ROUTES.some((r) => pathname.startsWith(r)) ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon")
+  ) {
     return NextResponse.next();
   }
 
-  // Allow Next.js internals
-  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
-    return NextResponse.next();
-  }
+  // Read Supabase session from the cookie
+  const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Extract and verify token
-  const token = extractToken(
-    request.headers.get("authorization"),
-    request.headers.get("cookie")
-  );
+  const supabase = createClient(supabaseUrl, supabaseAnon, {
+    global: {
+      headers: { cookie: request.headers.get("cookie") ?? "" },
+    },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
 
-  if (!token) {
-    // API routes return 401, page routes redirect to login
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const payload = verifyToken(token);
-  if (!payload) {
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-    const res = NextResponse.redirect(new URL("/login", request.url));
-    res.cookies.delete("token");
-    return res;
-  }
+  const role  = user.user_metadata?.role ?? "DISPATCHER";
+  const name  = user.user_metadata?.name ?? user.email;
+  const email = user.email;
+  const id    = user.id;
 
-  // Role-based access check for page routes
+  // Role guard for page routes
   if (!pathname.startsWith("/api/")) {
     const matchedRoute = Object.keys(ROLE_ACCESS).find((r) =>
       pathname.startsWith(r)
     );
-    if (matchedRoute) {
-      const allowedRoles = ROLE_ACCESS[matchedRoute];
-      if (!allowedRoles.includes(payload.role)) {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-      }
+    if (matchedRoute && !ROLE_ACCESS[matchedRoute].includes(role)) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
-  // Forward user info to route handlers via headers
+  // Forward user context to route handlers
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-user-id",    payload.sub);
-  requestHeaders.set("x-user-email", payload.email);
-  requestHeaders.set("x-user-name",  payload.name);
-  requestHeaders.set("x-user-role",  payload.role);
+  requestHeaders.set("x-user-id",    id);
+  requestHeaders.set("x-user-email", email);
+  requestHeaders.set("x-user-name",  name);
+  requestHeaders.set("x-user-role",  role);
 
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|public).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|public).*)"],
 };
