@@ -284,11 +284,11 @@ export default function DashboardHome() {
 
       {/* ── 7 KPI cards ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8 }}>
-        {KPI_CONFIG.map(({ key, label, icon, accent }) => (
+        {KPI_CONFIG.map(({ key, label, Icon, accent }) => (
           <KpiCard
             key={key}
             label={label}
-            icon={icon}
+            Icon={Icon}
             accent={accent}
             loading={loading}
             isPercent={key === "fleetUtilization"}
