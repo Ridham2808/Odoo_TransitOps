@@ -16,7 +16,7 @@ const ROUTE_SECTION = {
   "/drivers":    "drivers",
   "/trips":      "trips",
   "/maintenance":"maintenance",
-  "/fuel":       "fuel",
+  "/fuel-expenses": "fuel",
   "/analytics":  "analytics",
   "/settings":   "settings",
 };
