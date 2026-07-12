@@ -1,71 +1,77 @@
 // middleware.js
-// Reads auth session from Supabase cookie to protect routes.
-// Uses @supabase/ssr for edge-compatible cookie handling.
+// Edge-compatible auth guard + RBAC route guard.
+// Reads the Supabase session from cookie (no Node.js APIs).
+// Attaches x-user-* headers to every protected request.
 
 import { NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/api/auth"];
+// ── Routes that never require auth ────────────────────────────────────────
+const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/auth/logout"];
 
-const ROLE_ACCESS = {
-  "/fleet":       ["FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER"],
-  "/drivers":     ["FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER"],
-  "/trips":       ["FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER", "FINANCIAL_ANALYST"],
-  "/fuel":        ["FLEET_MANAGER", "DISPATCHER", "FINANCIAL_ANALYST"],
-  "/maintenance": ["FLEET_MANAGER", "SAFETY_OFFICER", "FINANCIAL_ANALYST"],
-  "/analytics":   ["FLEET_MANAGER", "SAFETY_OFFICER", "FINANCIAL_ANALYST"],
-  "/settings":    ["FLEET_MANAGER"],
+// ── Per-route access map (role → section key from lib/permissions.js) ─────
+// These must match the href prefixes used in the sidebar.
+const ROUTE_SECTION = {
+  "/dashboard":  "dashboard",
+  "/fleet":      "fleet",
+  "/drivers":    "drivers",
+  "/trips":      "trips",
+  "/maintenance":"maintenance",
+  "/fuel":       "fuel",
+  "/analytics":  "analytics",
+  "/settings":   "settings",
 };
 
-/**
- * Decode a JWT payload without verifying signature (edge-safe).
- * We trust Supabase's own session cookie validation implicitly for middleware.
- */
+// ── RBAC permission matrix (copy of lib/permissions.js — edge cannot import) ─
+const PERMISSIONS = {
+  FLEET_MANAGER:     { dashboard:"view", fleet:"edit",  drivers:"edit",  trips:null,    fuel:null,    analytics:"edit",  settings:"view", maintenance:"edit"  },
+  DISPATCHER:        { dashboard:"view", fleet:"view",  drivers:null,    trips:"edit",  fuel:null,    analytics:null,    settings:"view", maintenance:"view"  },
+  SAFETY_OFFICER:    { dashboard:"view", fleet:null,    drivers:"edit",  trips:"view",  fuel:null,    analytics:null,    settings:"view", maintenance:null    },
+  FINANCIAL_ANALYST: { dashboard:"view", fleet:"view",  drivers:null,    trips:null,    fuel:"edit",  analytics:"edit",  settings:"view", maintenance:"view"  },
+};
+
+function canAccess(role, section) {
+  return !!(PERMISSIONS[role]?.[section]);
+}
+
+// ── Edge-safe JWT payload decoder (no crypto, just base64 decode) ──────────
 function decodeJwtPayload(token) {
   try {
     const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = atob(base64);
-    return JSON.parse(json);
+    const padded  = base64 + "=".repeat((4 - base64.length % 4) % 4);
+    return JSON.parse(atob(padded));
   } catch {
     return null;
   }
 }
 
-/**
- * Extract the Supabase access token from the cookie header.
- * Supabase stores it as: sb-<ref>-auth-token (JSON array [access, refresh])
- */
-function getSupabaseSession(cookieHeader) {
+// ── Extract Supabase session payload from cookie header ───────────────────
+function getSessionPayload(cookieHeader) {
   if (!cookieHeader) return null;
 
-  // Try new format: sb-<project-ref>-auth-token=base64(json)
-  const sbMatch = cookieHeader.match(/sb-[^=]+-auth-token=([^;]+)/);
-  if (sbMatch) {
+  // Format 1: sb-<ref>-auth-token=<urlencoded JSON array>
+  const newFmt = cookieHeader.match(/sb-[^=]+-auth-token=([^;]+)/);
+  if (newFmt) {
     try {
-      const decoded = decodeURIComponent(sbMatch[1]);
-      // Supabase stores a JSON array [accessToken, refreshToken]
-      const parsed = JSON.parse(decoded);
-      const accessToken = Array.isArray(parsed) ? parsed[0] : parsed.access_token;
-      return accessToken ? decodeJwtPayload(accessToken) : null;
-    } catch {
-      return null;
-    }
+      const decoded = decodeURIComponent(newFmt[1]);
+      const parsed  = JSON.parse(decoded);
+      const token   = Array.isArray(parsed) ? parsed[0] : parsed.access_token;
+      if (token) return decodeJwtPayload(token);
+    } catch { /* fall through */ }
   }
 
-  // Fallback: look for access_token cookie directly
-  const atMatch = cookieHeader.match(/(?:^|;\s*)access_token=([^;]+)/);
-  if (atMatch) {
-    return decodeJwtPayload(decodeURIComponent(atMatch[1]));
-  }
+  // Format 2: sb-access-token=<jwt>  (set by our /api/auth/login)
+  const oldFmt = cookieHeader.match(/(?:^|;\s*)sb-access-token=([^;]+)/);
+  if (oldFmt) return decodeJwtPayload(decodeURIComponent(oldFmt[1]));
 
   return null;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes and Next.js internals
+  // Always allow Next.js internals and public assets
   if (
-    PUBLIC_ROUTES.some((r) => pathname.startsWith(r)) ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/public")
@@ -73,34 +79,42 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const payload = getSupabaseSession(cookieHeader);
+  // Allow public auth paths
+  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
 
-  if (!payload || !payload.sub) {
+  // ── Auth check ──────────────────────────────────────────────────────────
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const payload      = getSessionPayload(cookieHeader);
+
+  if (!payload?.sub) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Extract user info from JWT payload
-  const id    = payload.sub;
-  const email = payload.email ?? "";
-  const meta  = payload.user_metadata ?? {};
-  const role  = meta.role ?? "DISPATCHER";
-  const name  = meta.name ?? email;
+  // Extract user info
+  const userId = payload.sub;
+  const email  = payload.email ?? "";
+  const meta   = payload.user_metadata ?? {};
+  const role   = meta.role ?? "";
+  const name   = meta.name ?? email;
 
-  // Role guard for page routes
+  // ── RBAC page guard ─────────────────────────────────────────────────────
   if (!pathname.startsWith("/api/")) {
-    const matchedRoute = Object.keys(ROLE_ACCESS).find((r) => pathname.startsWith(r));
-    if (matchedRoute && !ROLE_ACCESS[matchedRoute].includes(role)) {
+    const section = Object.keys(ROUTE_SECTION).find((r) =>
+      r === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(r)
+    );
+    if (section && role && !canAccess(role, ROUTE_SECTION[section])) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
-  // Forward user context to route handlers via headers
+  // ── Forward user context as headers to route handlers ───────────────────
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-user-id",    id);
+  requestHeaders.set("x-user-id",    userId);
   requestHeaders.set("x-user-email", email);
   requestHeaders.set("x-user-name",  name);
   requestHeaders.set("x-user-role",  role);

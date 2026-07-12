@@ -4,36 +4,23 @@ import { useState, useEffect } from "react";
 import {
   Truck, Users, Route, Wrench,
   TrendingUp, TrendingDown, Activity,
-  ArrowRight, Clock, CheckCircle2, AlertTriangle,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { useUser } from "@/lib/userContext";
+import { canView } from "@/lib/permissions";
 import StatusBadge from "@/components/ui/StatusBadge";
-import { formatCurrency } from "@/lib/utils";
 
-const ROLE_LABELS = {
-  FLEET_MANAGER:     "Fleet Manager",
-  DISPATCHER:        "Dispatcher",
-  SAFETY_OFFICER:    "Safety Officer",
-  FINANCIAL_ANALYST: "Financial Analyst",
-};
 
-// Quick-access cards per role
-const ROLE_QUICKLINKS = {
-  FLEET_MANAGER:     ["/fleet", "/maintenance", "/drivers", "/analytics"],
-  DISPATCHER:        ["/trips", "/fleet", "/drivers", "/fuel"],
-  SAFETY_OFFICER:    ["/drivers", "/maintenance", "/trips", "/analytics"],
-  FINANCIAL_ANALYST: ["/fuel", "/analytics", "/trips"],
-};
-
-const NAV_META = {
-  "/fleet":       { label: "Fleet",           icon: Truck,    desc: "Manage your vehicle fleet"    },
-  "/drivers":     { label: "Drivers",          icon: Users,    desc: "Driver profiles & licenses"   },
-  "/trips":       { label: "Trips",            icon: Route,    desc: "Dispatch & track trips"       },
-  "/maintenance": { label: "Maintenance",      icon: Wrench,   desc: "Service logs & schedules"     },
-  "/fuel":        { label: "Fuel & Expenses",  icon: Activity, desc: "Fuel logs & cost tracking"    },
-  "/analytics":   { label: "Analytics",        icon: TrendingUp, desc: "Fleet performance insights" },
-};
+// Quick-access cards — filtered by permissions at render time
+const QUICK_LINKS = [
+  { href: "/fleet",       label: "Fleet",           icon: Truck,      desc: "Manage vehicle fleet",         section: "fleet"       },
+  { href: "/drivers",    label: "Drivers",          icon: Users,      desc: "Driver profiles & licenses",    section: "drivers"     },
+  { href: "/trips",      label: "Trips",            icon: Route,      desc: "Dispatch & track trips",        section: "trips"       },
+  { href: "/maintenance",label: "Maintenance",      icon: Wrench,     desc: "Service logs & schedules",      section: "maintenance" },
+  { href: "/fuel",       label: "Fuel & Expenses",  icon: Activity,   desc: "Fuel logs & cost tracking",     section: "fuel"        },
+  { href: "/analytics",  label: "Analytics",        icon: TrendingUp, desc: "Fleet performance insights",    section: "analytics"   },
+];
 
 function KpiCard({ label, value, sub, trend, icon: Icon, accentColor }) {
   const up = trend > 0;
@@ -78,16 +65,11 @@ function KpiCard({ label, value, sub, trend, icon: Icon, accentColor }) {
 }
 
 export default function DashboardHome() {
-  const [user, setUser] = useState(null);
-  const [stats, setStats] = useState(null);
+  const { role, name } = useUser();
+  const [stats, setStats]   = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) setUser(data.user);
-    });
-
-    // Fetch summary stats from API
     fetch("/api/dashboard/stats")
       .then((r) => r.json())
       .then((d) => setStats(d))
@@ -95,9 +77,7 @@ export default function DashboardHome() {
       .finally(() => setLoading(false));
   }, []);
 
-  const role      = user?.user_metadata?.role ?? "";
-  const name      = user?.user_metadata?.name ?? "there";
-  const quickLinks = ROLE_QUICKLINKS[role] ?? Object.keys(NAV_META);
+  const quickLinks = QUICK_LINKS.filter((link) => canView(role, link.section));
 
   const hour = new Date().getHours();
   const greeting =
@@ -154,14 +134,12 @@ export default function DashboardHome() {
       <div>
         <div className="text-label" style={{ marginBottom: 12 }}>Quick Access</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
-          {quickLinks.map((href) => {
-            const meta = NAV_META[href];
-            if (!meta) return null;
-            const Icon = meta.icon;
+        {quickLinks.map((link) => {
+            const Icon = link.icon;
             return (
               <Link
-                key={href}
-                href={href}
+                key={link.href}
+                href={link.href}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -185,22 +163,18 @@ export default function DashboardHome() {
               >
                 <div
                   style={{
-                    width: 30,
-                    height: 30,
-                    borderRadius: 6,
+                    width: 30, height: 30, borderRadius: 6,
                     background: "rgba(255,255,255,0.05)",
                     border: "1px solid rgba(255,255,255,0.08)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    display: "flex", alignItems: "center", justifyContent: "center",
                     flexShrink: 0,
                   }}
                 >
                   <Icon style={{ width: 14, height: 14, color: "var(--foreground)" }} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{meta.label}</div>
-                  <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 1 }}>{meta.desc}</div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{link.label}</div>
+                  <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 1 }}>{link.desc}</div>
                 </div>
                 <ArrowRight style={{ width: 14, height: 14, color: "var(--subtle)", flexShrink: 0 }} />
               </Link>
