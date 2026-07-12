@@ -1,11 +1,10 @@
-export const metadata = { title: "Settings" };
+// app/(dashboard)/settings/page.js
+import SettingsClient from "./SettingsClient";
+
+export const metadata = {
+  title: "System Settings",
+};
+
 export default function SettingsPage() {
-  return (
-    <div>
-      <h1 className="text-heading">Settings</h1>
-      <p style={{ color: "var(--muted)", marginTop: 6, fontSize: 13 }}>
-        Depot configuration & user management — coming in Phase 1.
-      </p>
-    </div>
-  );
+  return <SettingsClient />;
 }
