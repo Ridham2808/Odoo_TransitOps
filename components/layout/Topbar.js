@@ -1,23 +1,22 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Bell, ChevronDown, LogOut, Menu } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/userContext";
 import { ROLE_LABELS } from "@/lib/permissions";
+import LordIcon from "@/components/ui/LordIcon";
 
 export default function Topbar({ onMenuClick }) {
-  const router              = useRouter();
-  const { name, role, email } = useUser();
+  const router                  = useRouter();
+  const { name, role, email }   = useUser();
   const [dropOpen, setDropOpen] = useState(false);
-  const dropRef             = useRef(null);
+  const dropRef                 = useRef(null);
 
   const initials  = name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
   const roleLabel = ROLE_LABELS[role] ?? role ?? "";
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropRef.current && !dropRef.current.contains(e.target)) setDropOpen(false);
@@ -33,50 +32,42 @@ export default function Topbar({ onMenuClick }) {
 
   return (
     <header className="topbar">
-      {/* Hamburger — mobile only */}
+      {/* Hamburger — mobile */}
       <button
         onClick={onMenuClick}
         className="md:hidden"
         aria-label="Open sidebar"
-        style={{
-          background: "none", border: "none", cursor: "pointer",
-          color: "var(--muted)", padding: 4, display: "flex",
-        }}
+        style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: 4, display: "flex" }}
       >
-        <Menu style={{ width: 18, height: 18 }} />
+        <LordIcon name="menu" size={18} trigger="click" colors="primary:#888888,secondary:#555555" />
       </button>
 
       {/* Search */}
       <div className="search-input-wrap hidden sm:flex">
-        <Search className="search-icon" style={{ width: 13, height: 13 }} />
-        <input type="search" placeholder="Search…" aria-label="Global search" />
+        <LordIcon name="search" size={13} trigger="hover" colors="primary:#555555,secondary:#333333"
+          style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+        />
+        <input type="search" placeholder="Search…" aria-label="Global search" style={{ paddingLeft: 30 }} />
       </div>
 
       {/* Right side */}
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
+
         {/* Bell */}
         <button
           aria-label="Notifications"
           style={{
-            width: 30, height: 30,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "none", border: "1px solid transparent",
-            borderRadius: 6, cursor: "pointer",
-            color: "var(--subtle)", transition: "all var(--t)",
+            width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "none", border: "1px solid transparent", borderRadius: 6, cursor: "pointer",
+            transition: "all var(--t)",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--surface-hover)";
-            e.currentTarget.style.color = "var(--foreground)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "none";
-            e.currentTarget.style.color = "var(--subtle)";
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--surface-hover)"; e.currentTarget.style.borderColor = "var(--border)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "none"; e.currentTarget.style.borderColor = "transparent"; }}
         >
-          <Bell style={{ width: 14, height: 14 }} />
+          <LordIcon name="bell" size={16} trigger="hover" colors="primary:#555555,secondary:#333333" />
         </button>
 
-        {/* Vertical divider */}
+        {/* Divider */}
         <div style={{ width: 1, height: 18, background: "var(--border)", flexShrink: 0 }} />
 
         {/* User dropdown */}
@@ -91,29 +82,18 @@ export default function Topbar({ onMenuClick }) {
               borderColor: dropOpen ? "var(--border-strong)" : "transparent",
               borderRadius: 6, cursor: "pointer", transition: "all var(--t)",
             }}
-            onMouseEnter={(e) => {
-              if (!dropOpen) {
-                e.currentTarget.style.background  = "var(--surface-hover)";
-                e.currentTarget.style.borderColor = "var(--border)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!dropOpen) {
-                e.currentTarget.style.background  = "transparent";
-                e.currentTarget.style.borderColor = "transparent";
-              }
-            }}
+            onMouseEnter={(e) => { if (!dropOpen) { e.currentTarget.style.background = "var(--surface-hover)"; e.currentTarget.style.borderColor = "var(--border)"; } }}
+            onMouseLeave={(e) => { if (!dropOpen) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; } }}
           >
             {/* Avatar */}
-            <div
-              style={{
-                width: 24, height: 24, borderRadius: "50%",
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, fontWeight: 600, color: "#fff", flexShrink: 0,
-              }}
-            >
+            <div style={{
+              width: 26, height: 26, borderRadius: "50%",
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 10, fontWeight: 700, color: "#fff", flexShrink: 0,
+              letterSpacing: 0,
+            }}>
               {initials}
             </div>
 
@@ -129,47 +109,55 @@ export default function Topbar({ onMenuClick }) {
               )}
             </div>
 
-            <ChevronDown
-              style={{
-                width: 12, height: 12, color: "var(--subtle)", flexShrink: 0,
-                transform: dropOpen ? "rotate(180deg)" : "none",
-                transition: "transform var(--t)",
-              }}
+            <LordIcon
+              name="chevronDown"
+              size={12}
+              trigger="hover"
+              colors="primary:#555555,secondary:#333333"
+              style={{ transform: dropOpen ? "rotate(180deg)" : "none", transition: "transform var(--t)" }}
             />
           </button>
 
-          {/* Dropdown panel */}
+          {/* Dropdown */}
           {dropOpen && (
             <div
               className="animate-fade-in"
               style={{
                 position: "absolute", right: 0, top: "calc(100% + 6px)",
-                width: 200,
+                width: 210,
                 background: "var(--surface-elevated)",
                 border: "1px solid var(--border-strong)",
                 borderRadius: 8,
-                boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.3)",
-                overflow: "hidden",
-                zIndex: 100,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                overflow: "hidden", zIndex: 100,
               }}
             >
               {/* Header */}
               <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border)" }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{name}</div>
-                <div style={{ fontSize: 11, color: "var(--subtle)", marginTop: 2 }}>{email}</div>
-              </div>
-
-              {/* Role pill */}
-              <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
-                <span
-                  style={{
-                    fontSize: 10, fontWeight: 500, color: "var(--muted)",
-                    letterSpacing: "0.05em", textTransform: "uppercase",
-                    padding: "2px 6px", borderRadius: 4,
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: "50%",
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 11, fontWeight: 700, color: "#fff",
+                  }}>
+                    {initials}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{name}</div>
+                    <div style={{ fontSize: 11, color: "var(--subtle)", marginTop: 1 }}>{email}</div>
+                  </div>
+                </div>
+                {/* Role pill */}
+                <span style={{
+                  fontSize: 10, fontWeight: 600, color: "var(--muted)",
+                  letterSpacing: "0.05em", textTransform: "uppercase",
+                  padding: "2px 7px", borderRadius: 4,
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  display: "inline-block",
+                }}>
                   {roleLabel}
                 </span>
               </div>
@@ -189,7 +177,7 @@ export default function Topbar({ onMenuClick }) {
                   onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(248,113,113,0.08)")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                 >
-                  <LogOut style={{ width: 12, height: 12 }} />
+                  <LordIcon name="logout" size={14} trigger="hover" colors="primary:#F87171,secondary:#cc5555" />
                   Sign out
                 </button>
               </div>

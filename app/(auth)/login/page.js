@@ -5,10 +5,9 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Eye, EyeOff, AlertTriangle, ArrowRight, Zap, ChevronDown,
-} from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import Spinner from "@/components/ui/Spinner";
+import LordIcon from "@/components/ui/LordIcon";
 
 const ROLES = [
   { value: "FLEET_MANAGER",     label: "Fleet Manager"     },
@@ -84,7 +83,15 @@ export default function LoginPage() {
         return;
       }
 
-      // Success — redirect to dashboard
+      // Success — initialize client-side Supabase session so UserContext populates
+      if (json.access_token && json.refresh_token) {
+        await supabase.auth.setSession({
+          access_token:  json.access_token,
+          refresh_token: json.refresh_token,
+        });
+      }
+
+      // Redirect to dashboard
       router.push("/dashboard");
       router.refresh();
 
@@ -131,7 +138,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 64 }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Zap style={{ width: 16, height: 16, color: "#000" }} />
+            <LordIcon name="zap" size={16} trigger="loop" colors="primary:#000000,secondary:#333333" />
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.03em", color: "#fff", lineHeight: 1 }}>
@@ -205,7 +212,7 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 40 }}>
             <div style={{ width: 26, height: 26, borderRadius: 6, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Zap style={{ width: 13, height: 13, color: "#000" }} />
+              <LordIcon name="zap" size={13} trigger="loop" colors="primary:#000000,secondary:#333333" />
             </div>
             <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.02em", color: "#fff" }}>TransitOps</span>
           </div>
@@ -232,8 +239,8 @@ export default function LoginPage() {
                 marginBottom:  20,
               }}
             >
-              <AlertTriangle
-                style={{ width: 14, height: 14, color: "var(--status-red)", flexShrink: 0, marginTop: 1 }}
+              <LordIcon name="alert" size={16} trigger="loop" colors="primary:#F87171,secondary:#cc5555"
+                style={{ flexShrink: 0, marginTop: 1 }}
               />
               <div>
                 <p style={{ fontSize: 12, color: "var(--status-red)", lineHeight: 1.5 }}>
@@ -298,10 +305,12 @@ export default function LoginPage() {
                   onMouseEnter={(e) => (e.currentTarget.style.color = "var(--muted)")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "var(--subtle)")}
                 >
-                  {showPass
-                    ? <EyeOff style={{ width: 14, height: 14 }} />
-                    : <Eye    style={{ width: 14, height: 14 }} />
-                  }
+                  <LordIcon
+                    name={showPass ? "eyeOff" : "eye"}
+                    size={16}
+                    trigger="click"
+                    colors="primary:#555555,secondary:#333333"
+                  />
                 </button>
               </div>
             </Field>
@@ -354,7 +363,7 @@ export default function LoginPage() {
               {loading ? (
                 <><Spinner size={14} /> Signing in…</>
               ) : (
-                <>Sign In <ArrowRight style={{ width: 14, height: 14 }} /></>
+                <>Sign In <LordIcon name="arrowRight" size={14} trigger="hover" colors="primary:#000000,secondary:#333333" /></>
               )}
             </button>
           </form>

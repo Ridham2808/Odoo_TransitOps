@@ -92,15 +92,18 @@ export async function POST(request) {
     },
   }).catch(() => null); // non-blocking — don't fail login on Prisma write error
 
-  // ── 7. Set Supabase session cookies on the response ───────────────────────
-  const response = NextResponse.json({
-    ok:   true,
-    role: actualRole,
-    name: authData.user.user_metadata?.name ?? email,
-  });
-
-  // Set access + refresh tokens as httpOnly cookies
+  // ── 7. Build success response ─────────────────────────────────────────────
   const { access_token, refresh_token, expires_in } = authData.session;
+
+  // Return tokens in body so the client calls supabase.auth.setSession()
+  // which initializes the client-side SDK session (used by UserContext).
+  const response = NextResponse.json({
+    ok:            true,
+    role:          actualRole,
+    name:          authData.user.user_metadata?.name ?? email,
+    access_token,
+    refresh_token,
+  });
 
   response.cookies.set("sb-access-token", access_token, {
     httpOnly: true,

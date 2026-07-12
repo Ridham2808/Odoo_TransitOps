@@ -2,28 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard, Truck, Users, Route,
-  Wrench, Fuel, BarChart3, Settings, Zap, X,
-} from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/userContext";
 import { canView, canEdit } from "@/lib/permissions";
+import LordIcon from "@/components/ui/LordIcon";
 
-// Map every nav item to its permission section key
+// Map every nav item to its permission section key + Lordicon icon name
 const NAV_ITEMS = [
-  { label: "Dashboard",       href: "/dashboard",  icon: LayoutDashboard, section: "dashboard"   },
-  { label: "Fleet",           href: "/fleet",       icon: Truck,           section: "fleet"       },
-  { label: "Drivers",         href: "/drivers",     icon: Users,           section: "drivers"     },
-  { label: "Trips",           href: "/trips",       icon: Route,           section: "trips"       },
-  { label: "Maintenance",     href: "/maintenance", icon: Wrench,          section: "maintenance" },
-  { label: "Fuel & Expenses", href: "/fuel",        icon: Fuel,            section: "fuel"        },
-  { label: "Analytics",       href: "/analytics",   icon: BarChart3,       section: "analytics"   },
-  { label: "Settings",        href: "/settings",    icon: Settings,        section: "settings"    },
+  { label: "Dashboard",       href: "/dashboard",   icon: "dashboard",   section: "dashboard"   },
+  { label: "Fleet",           href: "/fleet",        icon: "truck",       section: "fleet"       },
+  { label: "Drivers",         href: "/drivers",      icon: "users",       section: "drivers"     },
+  { label: "Trips",           href: "/trips",        icon: "route",       section: "trips"       },
+  { label: "Maintenance",     href: "/maintenance",  icon: "wrench",      section: "maintenance" },
+  { label: "Fuel & Expenses", href: "/fuel",         icon: "fuel",        section: "fuel"        },
+  { label: "Analytics",       href: "/analytics",    icon: "analytics",   section: "analytics"   },
+  { label: "Settings",        href: "/settings",     icon: "settings",    section: "settings"    },
 ];
 
 export default function Sidebar({ mobileOpen, onClose }) {
-  const pathname  = usePathname();
+  const pathname = usePathname();
   const { role, name, loading } = useUser();
 
   return (
@@ -40,16 +38,18 @@ export default function Sidebar({ mobileOpen, onClose }) {
       <aside className={cn("sidebar", mobileOpen && "open")}>
         {/* ── Logo ── */}
         <div className="sidebar-logo">
-          <div
-            style={{
-              width: 26, height: 26, borderRadius: 6,
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Zap style={{ width: 13, height: 13, color: "#fff" }} />
+          <div style={{
+            width: 28, height: 28, borderRadius: 7,
+            background: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}>
+            <LordIcon
+              name="zap"
+              size={16}
+              trigger="loop"
+              colors="primary:#000000,secondary:#333333"
+            />
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -73,19 +73,8 @@ export default function Sidebar({ mobileOpen, onClose }) {
         {/* ── Nav ── */}
         <nav className="sidebar-nav" style={{ paddingTop: 8 }}>
           {NAV_ITEMS.map((item) => {
-            // RBAC: skip items the role has no access to
             if (role && !canView(role, item.section)) return null;
-            // While loading, show all items (skeleton state)
-            if (loading) {
-              return (
-                <div key={item.href} className="sidebar-item" style={{ opacity: 0.3 }}>
-                  <item.icon style={{ width: 14, height: 14, flexShrink: 0, opacity: 0.4 }} />
-                  <span>{item.label}</span>
-                </div>
-              );
-            }
 
-            const Icon     = item.icon;
             const isActive = item.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
@@ -100,62 +89,50 @@ export default function Sidebar({ mobileOpen, onClose }) {
                 className={cn("sidebar-item", isActive && "active")}
                 title={viewOnly ? `${item.label} (view only)` : item.label}
               >
-                <Icon
-                  style={{
-                    width: 14, height: 14, flexShrink: 0,
-                    color:   isActive ? "#fff" : "currentColor",
-                    opacity: isActive ? 1 : 0.55,
-                  }}
+                <LordIcon
+                  name={item.icon}
+                  size={16}
+                  trigger={isActive ? "loop" : "hover"}
+                  colors={
+                    isActive
+                      ? "primary:#ffffff,secondary:#aaaaaa"
+                      : "primary:#555555,secondary:#333333"
+                  }
                 />
+
                 <span style={{ flex: 1, letterSpacing: "-0.01em" }}>{item.label}</span>
 
-                {/* View-only indicator dot */}
                 {viewOnly && !isActive && (
-                  <span
-                    title="View only"
-                    style={{
-                      width: 5, height: 5, borderRadius: "50%",
-                      background: "var(--subtle)",
-                      flexShrink: 0,
-                      opacity: 0.5,
-                    }}
-                  />
+                  <span title="View only" style={{
+                    width: 5, height: 5, borderRadius: "50%",
+                    background: "var(--subtle)", flexShrink: 0, opacity: 0.5,
+                  }} />
                 )}
               </Link>
             );
           })}
         </nav>
 
-        {/* ── Role info footer ── */}
-        <div
-          style={{
-            padding:    "10px 14px 12px",
-            borderTop:  "1px solid var(--sidebar-border)",
-            flexShrink: 0,
-          }}
-        >
+        {/* ── User footer ── */}
+        <div style={{
+          padding: "10px 14px 12px",
+          borderTop: "1px solid var(--sidebar-border)",
+          flexShrink: 0,
+        }}>
           {role && (
-            <div
-              style={{
-                display:        "flex",
-                alignItems:     "center",
-                gap:             7,
-                marginBottom:    8,
-                padding:        "6px 8px",
-                borderRadius:    5,
-                background:     "rgba(255,255,255,0.03)",
-                border:         "1px solid rgba(255,255,255,0.06)",
-              }}
-            >
-              {/* Avatar initial */}
-              <div
-                style={{
-                  width: 20, height: 20, borderRadius: "50%",
-                  background: "rgba(255,255,255,0.08)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 9, fontWeight: 700, color: "#fff", flexShrink: 0,
-                }}
-              >
+            <div style={{
+              display: "flex", alignItems: "center", gap: 7,
+              marginBottom: 8, padding: "6px 8px",
+              borderRadius: 5,
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}>
+              <div style={{
+                width: 20, height: 20, borderRadius: "50%",
+                background: "rgba(255,255,255,0.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 9, fontWeight: 700, color: "#fff", flexShrink: 0,
+              }}>
                 {name?.[0]?.toUpperCase() ?? "?"}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>

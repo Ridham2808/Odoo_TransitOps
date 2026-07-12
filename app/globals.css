@@ -649,3 +649,25 @@ textarea.input { resize: vertical; min-height: 80px; line-height: 1.5; }
   background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
   pointer-events: none;
 }
+
+/* ── Spin animation (used by refresh button) ── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Slide up (used by error/alert cards) ── */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+.animate-slide-up { animation: slide-up 200ms ease forwards; }
+
+/* ── Dashboard KPI grid responsive breakpoints ── */
+@media (max-width: 1280px) {
+  .kpi-grid-7 { grid-template-columns: repeat(4, 1fr) !important; }
+}
+@media (max-width: 900px) {
+  .kpi-grid-7 { grid-template-columns: repeat(2, 1fr) !important; }
+  .dashboard-bottom { grid-template-columns: 1fr !important; }
+}
