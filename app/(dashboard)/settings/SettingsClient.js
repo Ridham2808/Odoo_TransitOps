@@ -96,6 +96,42 @@ export default function SettingsClient() {
     }
   };
 
+  const [sendingReminders, setSendingReminders] = useState(false);
+
+  const handleSendReminders = async () => {
+    setSendingReminders(true);
+    try {
+      const res = await fetch("/api/notifications/license-expiry", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send reminders");
+
+      if (data.sent) {
+        toast({
+          type: "success",
+          title: "Reminders Sent",
+          message: `${data.message} (${data.count} drivers flagged)`,
+        });
+      } else {
+        toast({
+          type: "info",
+          title: "No Expiries",
+          message: data.message,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      toast({
+        type: "error",
+        title: "Send Failed",
+        message: err.message || "Failed to trigger email reminders.",
+      });
+    } finally {
+      setSendingReminders(false);
+    }
+  };
+
   // RBAC permissions helper to display table cells
   const renderRbacCell = (val) => {
     if (val === "edit") {
@@ -253,6 +289,31 @@ export default function SettingsClient() {
                 </div>
               )}
             </form>
+
+            {/* Compliance Email Reminders */}
+            <div style={{ borderTop: "1px solid var(--border)", marginTop: 4, paddingTop: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <ShieldCheck style={{ width: 14, height: 14, color: "var(--status-blue)" }} />
+                <h3 style={{ fontSize: 12, fontWeight: 600, color: "#fff" }}>Compliance Notifications</h3>
+              </div>
+              <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 12, lineHeight: "1.4" }}>
+                Trigger an immediate email summarizing all expired or expiring driver licenses to the configured administration email.
+              </p>
+              <button
+                type="button"
+                onClick={handleSendReminders}
+                disabled={sendingReminders}
+                className="btn btn-secondary"
+                style={{ width: "100%", padding: "7px 14px", display: "flex", alignItems: "center", justifyCenter: "center", gap: 6 }}
+              >
+                <Save style={{ width: 14, height: 14 }} />
+                {sendingReminders ? "Sending alerts..." : "Send License Reminders Now"}
+              </button>
+              <span style={{ display: "block", fontSize: 9, color: "var(--subtle)", marginTop: 6, fontStyle: "italic", textAlign: "center" }}>
+                * In production, this job is scheduled daily via Vercel Cron or Node-Cron.
+              </span>
+            </div>
+
           </div>
 
           {/* ── Right Column: RBAC Permission Matrix Table ── */}
