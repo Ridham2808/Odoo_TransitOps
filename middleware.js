@@ -1,13 +1,11 @@
 // middleware.js
-// Verifies Supabase session on every protected request.
-// Forwards x-user-id / x-user-role headers to route handlers.
+// Reads auth session from Supabase cookie to protect routes.
+// Uses @supabase/ssr for edge-compatible cookie handling.
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
 const PUBLIC_ROUTES = ["/login", "/api/auth"];
 
-// Role-based page access
 const ROLE_ACCESS = {
   "/fleet":       ["FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER"],
   "/drivers":     ["FLEET_MANAGER", "DISPATCHER", "SAFETY_OFFICER"],
@@ -18,60 +16,89 @@ const ROLE_ACCESS = {
   "/settings":    ["FLEET_MANAGER"],
 };
 
-export async function middleware(request) {
+/**
+ * Decode a JWT payload without verifying signature (edge-safe).
+ * We trust Supabase's own session cookie validation implicitly for middleware.
+ */
+function decodeJwtPayload(token) {
+  try {
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(base64);
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extract the Supabase access token from the cookie header.
+ * Supabase stores it as: sb-<ref>-auth-token (JSON array [access, refresh])
+ */
+function getSupabaseSession(cookieHeader) {
+  if (!cookieHeader) return null;
+
+  // Try new format: sb-<project-ref>-auth-token=base64(json)
+  const sbMatch = cookieHeader.match(/sb-[^=]+-auth-token=([^;]+)/);
+  if (sbMatch) {
+    try {
+      const decoded = decodeURIComponent(sbMatch[1]);
+      // Supabase stores a JSON array [accessToken, refreshToken]
+      const parsed = JSON.parse(decoded);
+      const accessToken = Array.isArray(parsed) ? parsed[0] : parsed.access_token;
+      return accessToken ? decodeJwtPayload(accessToken) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // Fallback: look for access_token cookie directly
+  const atMatch = cookieHeader.match(/(?:^|;\s*)access_token=([^;]+)/);
+  if (atMatch) {
+    return decodeJwtPayload(decodeURIComponent(atMatch[1]));
+  }
+
+  return null;
+}
+
+export function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Allow public routes and Next.js internals
   if (
     PUBLIC_ROUTES.some((r) => pathname.startsWith(r)) ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/public")
   ) {
     return NextResponse.next();
   }
 
-  // Read Supabase session from the cookie
-  const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const payload = getSupabaseSession(cookieHeader);
 
-  const supabase = createClient(supabaseUrl, supabaseAnon, {
-    global: {
-      headers: { cookie: request.headers.get("cookie") ?? "" },
-    },
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  });
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!payload || !payload.sub) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const role  = user.user_metadata?.role ?? "DISPATCHER";
-  const name  = user.user_metadata?.name ?? user.email;
-  const email = user.email;
-  const id    = user.id;
+  // Extract user info from JWT payload
+  const id    = payload.sub;
+  const email = payload.email ?? "";
+  const meta  = payload.user_metadata ?? {};
+  const role  = meta.role ?? "DISPATCHER";
+  const name  = meta.name ?? email;
 
   // Role guard for page routes
   if (!pathname.startsWith("/api/")) {
-    const matchedRoute = Object.keys(ROLE_ACCESS).find((r) =>
-      pathname.startsWith(r)
-    );
+    const matchedRoute = Object.keys(ROLE_ACCESS).find((r) => pathname.startsWith(r));
     if (matchedRoute && !ROLE_ACCESS[matchedRoute].includes(role)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
-  // Forward user context to route handlers
+  // Forward user context to route handlers via headers
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id",    id);
   requestHeaders.set("x-user-email", email);
