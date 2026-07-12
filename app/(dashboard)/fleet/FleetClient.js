@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Search, Edit2, Trash2, X, AlertTriangle, Info } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, X, AlertTriangle, Info, Download } from "lucide-react";
 import { useUser } from "@/lib/userContext";
 import { useToast } from "@/components/ui/Toast";
+import { generatePdfFromTable } from "@/lib/pdf";
 
 // Zod schema for vehicle validation
 const vehicleSchema = z.object({
@@ -112,6 +113,26 @@ export default function FleetClient() {
     fetchVehicles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeFilter, statusFilter, searchQuery]);
+
+  const handleExportPDF = () => {
+    const headers = ["Reg. No.", "Name/Model", "Type", "Capacity", "Odometer", "Acq. Cost", "Status"];
+    const rows = vehicles.map((v) => [
+      v.registrationNo,
+      v.name,
+      v.type,
+      `${v.maxLoadCapacity} kg`,
+      `${v.odometer.toLocaleString()} km`,
+      `INR ${v.acquisitionCost.toLocaleString()}`,
+      v.status,
+    ]);
+
+    generatePdfFromTable(headers, rows, "Vehicle Registry Report", "Active Transit Fleet List");
+    toast({
+      type: "success",
+      title: "PDF Exported",
+      message: "Filtered vehicle registry PDF downloaded successfully.",
+    });
+  };
 
   // Open modal for Adding
   const handleAddClick = () => {
@@ -255,31 +276,43 @@ export default function FleetClient() {
           </p>
         </div>
 
-        {/* Add vehicle button — only Fleet Manager gets this */}
-        {isEditAllowed && (
+        {/* Actions Container */}
+        <div style={{ display: "flex", gap: 8 }}>
           <button
-            onClick={handleAddClick}
-            className="btn"
+            onClick={handleExportPDF}
+            className="btn btn-secondary"
             style={{
-              background: "#F59E0B",
-              color: "#000000",
-              borderColor: "#F59E0B",
-              fontWeight: 600,
               padding: "7px 14px",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#D97706";
-              e.currentTarget.style.borderColor = "#D97706";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#F59E0B";
-              e.currentTarget.style.borderColor = "#F59E0B";
-            }}
           >
-            <Plus style={{ width: 14, height: 14 }} />
-            Add Vehicle
+            <Download style={{ width: 14, height: 14 }} />
+            Export PDF
           </button>
-        )}
+          {isEditAllowed && (
+            <button
+              onClick={handleAddClick}
+              className="btn"
+              style={{
+                background: "#F59E0B",
+                color: "#000000",
+                borderColor: "#F59E0B",
+                fontWeight: 600,
+                padding: "7px 14px",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#D97706";
+                e.currentTarget.style.borderColor = "#D97706";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#F59E0B";
+                e.currentTarget.style.borderColor = "#F59E0B";
+              }}
+            >
+              <Plus style={{ width: 14, height: 14 }} />
+              Add Vehicle
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Filter bar ── */}

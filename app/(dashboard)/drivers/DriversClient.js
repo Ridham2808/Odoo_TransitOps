@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Search, Edit2, Trash2, X, AlertTriangle, Info, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, X, AlertTriangle, Info, ShieldAlert, CheckCircle2, Download } from "lucide-react";
 import { useUser } from "@/lib/userContext";
 import { useToast } from "@/components/ui/Toast";
+import { generatePdfFromTable } from "@/lib/pdf";
 
 // Zod validation schema for driver profile
 const driverSchema = z.object({
@@ -133,6 +134,27 @@ export default function DriversClient() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return expiry < today;
+  };
+
+  const handleExportPDF = () => {
+    const headers = ["Driver Name", "License No.", "Category", "Expiry", "Contact", "Trip Comp. %", "Safety Score", "Status"];
+    const rows = drivers.map((d) => [
+      d.name,
+      d.licenseNumber,
+      d.licenseCategory,
+      new Date(d.licenseExpiry).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) + (isExpired(d.licenseExpiry) ? " (EXPIRED)" : ""),
+      d.contactNumber,
+      `${d.completionRate}%`,
+      `${d.safetyScore} pts`,
+      d.status,
+    ]);
+
+    generatePdfFromTable(headers, rows, "Driver Registry & Safety Profiles", "Active Logistics Drivers Directory");
+    toast({
+      type: "success",
+      title: "PDF Exported",
+      message: "Filtered drivers registry PDF downloaded successfully.",
+    });
   };
 
   // Open modal for Adding
@@ -329,31 +351,43 @@ export default function DriversClient() {
           </p>
         </div>
 
-        {/* Add Driver Button */}
-        {isEditAllowed && (
+        {/* Actions Container */}
+        <div style={{ display: "flex", gap: 8 }}>
           <button
-            onClick={handleAddClick}
-            className="btn"
+            onClick={handleExportPDF}
+            className="btn btn-secondary"
             style={{
-              background: "#F59E0B",
-              color: "#000000",
-              borderColor: "#F59E0B",
-              fontWeight: 600,
               padding: "7px 14px",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#D97706";
-              e.currentTarget.style.borderColor = "#D97706";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#F59E0B";
-              e.currentTarget.style.borderColor = "#F59E0B";
-            }}
           >
-            <Plus style={{ width: 14, height: 14 }} />
-            Add Driver
+            <Download style={{ width: 14, height: 14 }} />
+            Export PDF
           </button>
-        )}
+          {isEditAllowed && (
+            <button
+              onClick={handleAddClick}
+              className="btn"
+              style={{
+                background: "#F59E0B",
+                color: "#000000",
+                borderColor: "#F59E0B",
+                fontWeight: 600,
+                padding: "7px 14px",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#D97706";
+                e.currentTarget.style.borderColor = "#D97706";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#F59E0B";
+                e.currentTarget.style.borderColor = "#F59E0B";
+              }}
+            >
+              <Plus style={{ width: 14, height: 14 }} />
+              Add Driver
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Search Bar ── */}

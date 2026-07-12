@@ -151,6 +151,7 @@ export async function GET(request) {
       }));
 
     return NextResponse.json({
+      depotName: settings?.depotName ?? "Main Logistics Hub, Mumbai",
       ratePerKm,
       kpis: {
         fuelEfficiency: Math.round(fuelEfficiency * 10) / 10,

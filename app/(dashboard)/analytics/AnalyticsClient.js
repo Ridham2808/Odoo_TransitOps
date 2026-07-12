@@ -9,6 +9,8 @@ import {
   BarChart3, Fuel, Percent, DollarSign, Download, Info, 
   ShieldAlert, TrendingUp, TrendingDown, ArrowRight 
 } from "lucide-react";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import { useUser } from "@/lib/userContext";
 import { useToast } from "@/components/ui/Toast";
 
@@ -92,6 +94,122 @@ export default function AnalyticsClient() {
     });
   };
 
+  const handleExportPDF = () => {
+    if (!data) return;
+
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Title
+    doc.setTextColor(20, 20, 20);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Fleet Operational & ROI Report", 14, 20);
+
+    // Subtitle (Depot Name)
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Depot: ${data.depotName || "All Depots"}`, 14, 26);
+
+    // Timestamp
+    const timestamp = `Generated: ${new Date().toLocaleString("en-IN")}`;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(110, 110, 110);
+    doc.text(timestamp, 14, 32);
+
+    // Divider line
+    doc.setDrawColor(220, 220, 220);
+    doc.line(14, 35, pageWidth - 14, 35);
+
+    // ── KPI Summary Cards ──
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(20, 20, 20);
+    doc.text("Key Performance Indicators (KPIs)", 14, 44);
+
+    // Draw 4 KPI blocks
+    const kpis = [
+      { label: "Fuel Efficiency", val: `${data.kpis.fuelEfficiency} km/l` },
+      { label: "Fleet Utilization", val: `${data.kpis.fleetUtilization}%` },
+      { label: "Operational Cost", val: `INR ${data.kpis.totalOperationalCost.toLocaleString()}` },
+      { label: "Avg Fleet ROI", val: `${data.kpis.avgFleetRoi}%` },
+    ];
+
+    const boxWidth = 43;
+    const boxHeight = 18;
+    const boxGap = 3.5;
+    let startX = 14;
+    const startY = 48;
+
+    kpis.forEach((kpi, idx) => {
+      const x = startX + idx * (boxWidth + boxGap);
+      
+      // Draw background box
+      doc.setFillColor(248, 249, 250);
+      doc.rect(x, startY, boxWidth, boxHeight, "F");
+      doc.setDrawColor(230, 230, 230);
+      doc.rect(x, startY, boxWidth, boxHeight, "S");
+
+      // Draw label
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 100, 100);
+      doc.text(kpi.label, x + 3, startY + 5);
+
+      // Draw value
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10.5);
+      doc.setTextColor(20, 20, 20);
+      doc.text(kpi.val, x + 3, startY + 12);
+    });
+
+    // ── Top Costliest Vehicles Table ──
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(20, 20, 20);
+    doc.text("Top Costliest Vehicles", 14, 76);
+
+    const headers = ["Vehicle Reg No", "Model / Name", "Total Operational Cost"];
+    const rows = data.topCostliestVehicles.map((v) => [
+      v.name,
+      v.model,
+      `INR ${v.cost.toLocaleString()}`,
+    ]);
+
+    doc.autoTable({
+      startY: 80,
+      head: [headers],
+      body: rows,
+      theme: "striped",
+      headStyles: {
+        fillColor: [24, 24, 24],
+        textColor: [255, 255, 255],
+        fontSize: 9,
+        fontStyle: "bold",
+      },
+      bodyStyles: {
+        fontSize: 8.5,
+        textColor: [50, 50, 50],
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    doc.save(`TransitOps_Analytics_Report_${new Date().toISOString().split("T")[0]}.pdf`);
+
+    toast({
+      type: "success",
+      title: "PDF Exported",
+      message: "Analytics PDF report downloaded successfully.",
+    });
+  };
+
   // Render unauthorized screen
   if (mounted && !hasAccess) {
     return (
@@ -145,22 +263,24 @@ export default function AnalyticsClient() {
           </p>
         </div>
 
-        {/* CSV Export Button */}
+        {/* Export Buttons */}
         {!loading && data && (
-          <button
-            onClick={handleExportCSV}
-            className="btn"
-            style={{
-              background: "var(--surface-elevated)",
-              color: "var(--foreground-2)",
-              borderColor: "var(--border-strong)",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border-strong)")}
-          >
-            <Download style={{ width: 14, height: 14 }} />
-            Export CSV
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={handleExportCSV}
+              className="btn btn-secondary"
+            >
+              <Download style={{ width: 14, height: 14 }} />
+              Export CSV
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="btn btn-primary"
+            >
+              <Download style={{ width: 14, height: 14 }} />
+              Export PDF
+            </button>
+          </div>
         )}
       </div>
 
