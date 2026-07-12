@@ -34,7 +34,11 @@ export async function GET(request) {
   try {
     assertView(user.role, "drivers");
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 403 });
+    try {
+      assertView(user.role, "trips");
+    } catch {
+      return NextResponse.json({ error: err.message }, { status: 403 });
+    }
   }
 
   const { searchParams } = request.nextUrl;
