@@ -18,11 +18,15 @@ export const metadata = {
   keywords: ["fleet management", "transport operations", "dispatch", "logistics"],
 };
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         {/* Lordicon animated icons — registers <lord-icon> web component globally */}
         <Script
           src="https://cdn.lordicon.com/lordicon.js"

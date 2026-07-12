@@ -213,7 +213,7 @@ export default function SettingsClient() {
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid var(--border)", paddingBottom: 10 }}>
               <SettingsIcon style={{ width: 14, height: 14, color: "var(--subtle)" }} />
-              <h2 style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>General Configurations</h2>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>General Configurations</h2>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -294,7 +294,7 @@ export default function SettingsClient() {
             <div style={{ borderTop: "1px solid var(--border)", marginTop: 4, paddingTop: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <ShieldCheck style={{ width: 14, height: 14, color: "var(--status-blue)" }} />
-                <h3 style={{ fontSize: 12, fontWeight: 600, color: "#fff" }}>Compliance Notifications</h3>
+                <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>Compliance Notifications</h3>
               </div>
               <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 12, lineHeight: "1.4" }}>
                 Trigger an immediate email summarizing all expired or expiring driver licenses to the configured administration email.
@@ -323,7 +323,7 @@ export default function SettingsClient() {
               <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8 }}>
                 <ShieldCheck style={{ width: 15, height: 15, color: "var(--status-blue)" }} />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Role-Based Access (RBAC)</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Role-Based Access (RBAC)</div>
                   <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>System permissions generated live from source module</div>
                 </div>
               </div>
@@ -340,7 +340,7 @@ export default function SettingsClient() {
                 <tbody>
                   {roles.map((r) => (
                     <tr key={r} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                      <td style={{ fontWeight: 600, color: "#fff" }}>
+                      <td style={{ fontWeight: 600, color: "var(--foreground)" }}>
                         {ROLE_LABELS[r] ?? r}
                       </td>
                       {columns.map((c) => (

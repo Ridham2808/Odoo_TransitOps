@@ -68,6 +68,45 @@ export default function TripsClient() {
 
   // Filter state
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const handleGlobalSearch = (e) => {
+      setSearchQuery(e.detail || "");
+    };
+    window.addEventListener("global-search", handleGlobalSearch);
+    return () => window.removeEventListener("global-search", handleGlobalSearch);
+  }, []);
+
+  // Sorting states
+  const [sortField, setSortField] = useState("");
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const renderSortHeader = (field, label) => {
+    const isSorted = sortField === field;
+    const arrow = isSorted ? (sortDirection === "asc" ? " ↑" : " ↓") : "";
+    return (
+      <th
+        onClick={() => handleSort(field)}
+        style={{ cursor: "pointer", userSelect: "none" }}
+        className="hover-text-white"
+      >
+        <span style={{ display: "inline-flex", alignItems: "center" }}>
+          {label}
+          <span style={{ fontSize: 10, color: "var(--muted)", marginLeft: 4 }}>{arrow}</span>
+        </span>
+      </th>
+    );
+  };
 
   // react-hook-form setup for Create Form
   const {
@@ -140,8 +179,30 @@ export default function TripsClient() {
 
   // Filtered trips
   const filteredTrips = trips.filter((t) => {
-    if (statusFilter === "ALL") return true;
-    return t.status === statusFilter;
+    const matchesStatus = statusFilter === "ALL" || t.status === statusFilter;
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return matchesStatus;
+
+    const matchesSearch = 
+      t.tripCode.toLowerCase().includes(query) ||
+      t.source.toLowerCase().includes(query) ||
+      t.destination.toLowerCase().includes(query);
+
+    return matchesStatus && matchesSearch;
+  });
+
+  const sortedTrips = [...filteredTrips].sort((a, b) => {
+    if (!sortField) return 0;
+    let aVal = a[sortField];
+    let bVal = b[sortField];
+    if (aVal === undefined || aVal === null) return 1;
+    if (bVal === undefined || bVal === null) return -1;
+    if (typeof aVal === "string") {
+      return sortDirection === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
   });
 
   // Calculate standard stats for available vehicles & drivers
@@ -349,7 +410,7 @@ export default function TripsClient() {
           <ShieldAlert style={{ width: 42, height: 42, color: "var(--status-red)" }} />
         </div>
         <div style={{ textAlign: "center" }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: "#fff" }}>Access Denied</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--foreground)" }}>Access Denied</h2>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 6, maxWidth: 360 }}>
             Your role ({role?.replace(/_/g, " ")}) does not have view access to the Trip Dispatcher registry.
           </p>
@@ -454,7 +515,7 @@ export default function TripsClient() {
           /* ── CREATE TRIP FORM ── */
           <div style={{ padding: 24, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8 }}>
             <div style={{ marginBottom: 20 }}>
-              <h2 style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Create Dispatch Assignment</h2>
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)" }}>Create Dispatch Assignment</h2>
               <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 3 }}>
                 Assign an available driver and vehicle constraint layout.
               </p>
@@ -621,7 +682,7 @@ export default function TripsClient() {
                 }`}>
                   {selectedTrip.status}
                 </span>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: "#fff", marginTop: 6 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--foreground)", marginTop: 6 }}>
                   Trip details: {selectedTrip.tripCode}
                 </h2>
               </div>
@@ -642,12 +703,12 @@ export default function TripsClient() {
               <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", background: "rgba(255,255,255,0.01)", border: "1px solid var(--border)", borderRadius: 6 }}>
                 <div style={{ display: "flex", flexDirection: "column" }}>
                   <span style={{ fontSize: 10, color: "var(--subtle)", textTransform: "uppercase" }}>Source</span>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "#fff" }}>{selectedTrip.source}</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{selectedTrip.source}</span>
                 </div>
                 <ArrowRight style={{ width: 14, height: 14, color: "var(--subtle)" }} />
                 <div style={{ display: "flex", flexDirection: "column" }}>
                   <span style={{ fontSize: 10, color: "var(--subtle)", textTransform: "uppercase" }}>Destination</span>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "#fff" }}>{selectedTrip.destination}</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{selectedTrip.destination}</span>
                 </div>
               </div>
 
@@ -659,7 +720,7 @@ export default function TripsClient() {
                   <span style={{ fontSize: 9, color: "var(--subtle)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 4 }}>
                     <Truck style={{ width: 10, height: 10 }} /> Vehicle
                   </span>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#fff", marginTop: 4 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)", marginTop: 4 }}>
                     {selectedTrip.vehicle?.registrationNo || "Unassigned"}
                   </div>
                   <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
@@ -672,7 +733,7 @@ export default function TripsClient() {
                   <span style={{ fontSize: 9, color: "var(--subtle)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 4 }}>
                     <UserIcon style={{ width: 10, height: 10 }} /> Driver
                   </span>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#fff", marginTop: 4 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)", marginTop: 4 }}>
                     {selectedTrip.driver?.name || "Unassigned"}
                   </div>
                   <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
@@ -884,10 +945,10 @@ export default function TripsClient() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Trip Code</th>
-                <th>Route</th>
+                {renderSortHeader("tripCode", "Trip Code")}
+                {renderSortHeader("source", "Route")}
                 <th>Assignments</th>
-                <th>Status</th>
+                {renderSortHeader("status", "Status")}
                 <th>Status Notes</th>
               </tr>
             </thead>
@@ -899,14 +960,14 @@ export default function TripsClient() {
                     Syncing live board...
                   </td>
                 </tr>
-              ) : filteredTrips.length === 0 ? (
+              ) : sortedTrips.length === 0 ? (
                 <tr>
                   <td colSpan={5} style={{ textAlign: "center", padding: "64px 0", color: "var(--muted)" }}>
                     No active trips found matching the selected status.
                   </td>
                 </tr>
               ) : (
-                filteredTrips.map((t) => {
+                sortedTrips.map((t) => {
                   const isSelected = selectedTrip?.id === t.id;
                   
                   // Construct status note
@@ -933,7 +994,7 @@ export default function TripsClient() {
                         background: isSelected ? "rgba(255,255,255,0.02)" : "transparent",
                       }}
                     >
-                      <td style={{ fontWeight: 600, color: "#fff", fontFamily: "monospace", fontSize: 11 }}>
+                      <td style={{ fontWeight: 600, color: "var(--foreground)", fontFamily: "monospace", fontSize: 11 }}>
                         {t.tripCode}
                       </td>
                       <td>
@@ -1031,7 +1092,7 @@ export default function TripsClient() {
               padding: 20,
             }}
           >
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 6 }}>
+            <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)", marginBottom: 6 }}>
               Cancel Trip Assignment?
             </h2>
             <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, marginBottom: 14 }}>

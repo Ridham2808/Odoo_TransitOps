@@ -277,7 +277,7 @@ export default function FuelExpensesClient() {
           <ShieldAlert style={{ width: 22, height: 22 }} />
         </div>
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: "#fff" }}>Access Forbidden</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--foreground)" }}>Access Forbidden</h2>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 6, maxWidth: 360 }}>
             Only the Financial Analyst and Fleet Manager roles are permitted to access this module.
           </p>
@@ -375,7 +375,7 @@ export default function FuelExpensesClient() {
         
         {/* Table 1: Fuel Logs */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)", display: "flex", alignItems: "center", gap: 6 }}>
             <Fuel style={{ width: 14, height: 14, color: "var(--status-green)" }} />
             Fuel Logs
           </h3>
@@ -405,7 +405,7 @@ export default function FuelExpensesClient() {
                 ) : (
                   filteredFuelLogs.map((log) => (
                     <tr key={log.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                      <td style={{ fontWeight: 600, color: "#fff" }}>{log.vehicle.registrationNo}</td>
+                      <td style={{ fontWeight: 600, color: "var(--foreground)" }}>{log.vehicle.registrationNo}</td>
                       <td>{formatDate(log.date)}</td>
                       <td>{log.liters.toLocaleString()} L</td>
                       <td style={{ textAlign: "right", fontWeight: 600, color: "var(--status-green)" }}>
@@ -421,7 +421,7 @@ export default function FuelExpensesClient() {
 
         {/* Table 2: Other Expenses */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)", display: "flex", alignItems: "center", gap: 6 }}>
             <DollarSign style={{ width: 14, height: 14, color: "var(--status-blue)" }} />
             Other Expenses (Toll/Misc)
           </h3>
@@ -458,7 +458,7 @@ export default function FuelExpensesClient() {
                       <tr key={exp.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                         <td>
                           <div>
-                            <div style={{ fontWeight: 600, color: "#fff" }}>
+                            <div style={{ fontWeight: 600, color: "var(--foreground)" }}>
                               {exp.trip?.tripCode ?? "Unassigned"}
                             </div>
                             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 1 }}>
@@ -471,7 +471,7 @@ export default function FuelExpensesClient() {
                         <td style={{ color: maintCost > 0 ? "var(--status-blue)" : "var(--muted)" }}>
                           ₹{maintCost.toLocaleString()}
                         </td>
-                        <td style={{ textAlign: "right", fontWeight: 600, color: "#fff" }}>
+                        <td style={{ textAlign: "right", fontWeight: 600, color: "var(--foreground)" }}>
                           ₹{rowTotal.toLocaleString()}
                         </td>
                       </tr>
@@ -502,7 +502,7 @@ export default function FuelExpensesClient() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <FileSpreadsheet style={{ width: 16, height: 16, color: "#F59E0B" }} />
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>
               Total Operational Cost (Auto)
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
@@ -528,7 +528,7 @@ export default function FuelExpensesClient() {
           
           <div className="animate-scale-up" style={{ position: "relative", width: "100%", maxWidth: 400, background: "var(--surface-elevated)", border: "1px solid var(--border-strong)", borderRadius: 12, boxShadow: "0 20px 50px rgba(0,0,0,0.7)", overflow: "hidden", margin: "auto" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
-              <h2 style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Log Fuel Refill</h2>
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)" }}>Log Fuel Refill</h2>
               <button onClick={() => setIsFuelModalOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X style={{ width: 16, height: 16 }} /></button>
             </div>
 
@@ -599,7 +599,7 @@ export default function FuelExpensesClient() {
           
           <div className="animate-scale-up" style={{ position: "relative", width: "100%", maxWidth: 400, background: "var(--surface-elevated)", border: "1px solid var(--border-strong)", borderRadius: 12, boxShadow: "0 20px 50px rgba(0,0,0,0.7)", overflow: "hidden", margin: "auto" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
-              <h2 style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Log Operational Expense</h2>
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)" }}>Log Operational Expense</h2>
               <button onClick={() => setIsExpenseModalOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X style={{ width: 16, height: 16 }} /></button>
             </div>
 

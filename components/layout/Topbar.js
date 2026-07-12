@@ -1,18 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Bell, ChevronDown, LogOut } from "lucide-react";
+import { Search, Bell, ChevronDown, LogOut, Sun, Moon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/userContext";
 import { ROLE_LABELS } from "@/lib/permissions";
+import { useTheme } from "next-themes";
 
 export default function Topbar({ onMenuClick }) {
   const router                  = useRouter();
   const { name, role, email }   = useUser();
   const [dropOpen, setDropOpen] = useState(false);
   const dropRef                 = useRef(null);
+
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const initials  = name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
   const roleLabel = ROLE_LABELS[role] ?? role ?? "";
@@ -55,11 +63,46 @@ export default function Topbar({ onMenuClick }) {
           placeholder="Search…"
           aria-label="Global search"
           style={{ paddingLeft: 30 }}
+          onChange={(e) => {
+            window.dispatchEvent(new CustomEvent("global-search", { detail: e.target.value }));
+          }}
         />
       </div>
 
       {/* Right side */}
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
+        {/* Theme Toggle */}
+        {mounted && (
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label="Toggle theme"
+            style={{
+              width: 30,
+              height: 30,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "none",
+              border: "1px solid transparent",
+              borderRadius: 6,
+              cursor: "pointer",
+              color: "var(--muted)",
+              transition: "all var(--t)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--surface-hover)";
+              e.currentTarget.style.borderColor = "var(--border)";
+              e.currentTarget.style.color = "var(--foreground)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "none";
+              e.currentTarget.style.borderColor = "transparent";
+              e.currentTarget.style.color = "var(--muted)";
+            }}
+          >
+            {theme === "dark" ? <Sun style={{ width: 15, height: 15 }} /> : <Moon style={{ width: 15, height: 15 }} />}
+          </button>
+        )}
 
         {/* Bell */}
         <button

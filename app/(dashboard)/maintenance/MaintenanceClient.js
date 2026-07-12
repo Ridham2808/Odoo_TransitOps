@@ -236,7 +236,7 @@ export default function MaintenanceClient() {
           <ShieldAlert style={{ width: 22, height: 22 }} />
         </div>
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: "#fff" }}>Access Forbidden</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--foreground)" }}>Access Forbidden</h2>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 6, maxWidth: 360 }}>
             Only the Fleet Manager has permissions to view or update vehicle maintenance logs.
           </p>
@@ -272,7 +272,7 @@ export default function MaintenanceClient() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid var(--border)", paddingBottom: 10 }}>
             <Wrench style={{ width: 14, height: 14, color: "var(--subtle)" }} />
-            <h2 style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Log Service Record</h2>
+            <h2 style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Log Service Record</h2>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -423,12 +423,12 @@ export default function MaintenanceClient() {
                       <tr key={log.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                         <td>
                           <div>
-                            <div style={{ fontWeight: 600, color: "#fff" }}>{log.vehicle.registrationNo}</div>
+                            <div style={{ fontWeight: 600, color: "var(--foreground)" }}>{log.vehicle.registrationNo}</div>
                             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 1 }}>{log.vehicle.name}</div>
                           </div>
                         </td>
                         <td>{log.serviceType}</td>
-                        <td style={{ fontWeight: 500, color: "#fff" }}>₹{log.cost.toLocaleString()}</td>
+                        <td style={{ fontWeight: 500, color: "var(--foreground)" }}>₹{log.cost.toLocaleString()}</td>
                         <td>{formatDate(log.date)}</td>
                         <td>
                           <span className={`badge ${log.status === "ACTIVE" ? "badge-neutral" : "badge-green"}`}>

@@ -91,7 +91,7 @@ function KpiCard({ label, value, Icon, accent, loading, isPercent }) {
           fontSize:      28,
           fontWeight:    700,
           letterSpacing: "-0.04em",
-          color:         "#fff",
+          color: "var(--foreground)",
           lineHeight:    1,
         }}>
           {isPercent ? `${value}%` : String(value).padStart(2, "0")}
@@ -188,7 +188,7 @@ export default function DashboardHome() {
       {/* ── Page header ── */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.03em", color: "#fff", marginBottom: 2 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.03em", color: "var(--foreground)", marginBottom: 2 }}>
             {greeting}{name ? `, ${name.split(" ")[0]}` : ""} 👋
           </h1>
           <p style={{ fontSize: 12, color: "var(--muted)" }}>
@@ -305,7 +305,7 @@ export default function DashboardHome() {
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "-0.02em", color: "#fff" }}>Recent Trips</div>
+              <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "-0.02em", color: "var(--foreground)" }}>Recent Trips</div>
               <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>Last 6 dispatched trips</div>
             </div>
             <Link
@@ -390,7 +390,7 @@ export default function DashboardHome() {
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
           {/* Header */}
           <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
-            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "-0.02em", color: "#fff" }}>Vehicle Status</div>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "-0.02em", color: "var(--foreground)" }}>Vehicle Status</div>
             {loading ? (
               <Skel w={60} h={10} style={{ marginTop: 4 }} />
             ) : (
@@ -420,7 +420,7 @@ export default function DashboardHome() {
                         <Skel w={30} h={11} />
                       ) : (
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: 11, fontWeight: 600, color: "#fff", fontVariantNumeric: "tabular-nums" }}>{count}</span>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: "var(--foreground)", fontVariantNumeric: "tabular-nums" }}>{count}</span>
                           <span style={{ fontSize: 10, color: "var(--subtle)" }}>{pct}%</span>
                         </div>
                       )}
@@ -460,7 +460,7 @@ export default function DashboardHome() {
                   Utilization
                 </div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                  <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.04em", color: "#fff" }}>
+                  <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.04em", color: "var(--foreground)" }}>
                     {data?.fleetUtilization ?? 0}%
                   </span>
                   <span style={{ fontSize: 11, color: "var(--muted)" }}>fleet on trip</span>

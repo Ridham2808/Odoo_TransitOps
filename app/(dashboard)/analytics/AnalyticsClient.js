@@ -240,7 +240,7 @@ export default function AnalyticsClient() {
           <ShieldAlert style={{ width: 22, height: 22 }} />
         </div>
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: "#fff" }}>Access Forbidden</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--foreground)" }}>Access Forbidden</h2>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 6, maxWidth: 360 }}>
             Only the Fleet Manager and Financial Analyst roles are permitted to access reports.
           </p>
@@ -301,7 +301,7 @@ export default function AnalyticsClient() {
                 </span>
                 <Fuel style={{ width: 14, height: 14, color: "var(--status-green)" }} />
               </div>
-              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "#fff", marginTop: 10 }}>
+              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "var(--foreground)", marginTop: 10 }}>
                 {data.kpis.fuelEfficiency} <span style={{ fontSize: 13, fontWeight: 500, color: "var(--muted)" }}>km/l</span>
               </div>
               <p style={{ fontSize: 11, color: "var(--subtle)", marginTop: 6 }}>
@@ -317,7 +317,7 @@ export default function AnalyticsClient() {
                 </span>
                 <Percent style={{ width: 14, height: 14, color: "var(--status-blue)" }} />
               </div>
-              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "#fff", marginTop: 10 }}>
+              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "var(--foreground)", marginTop: 10 }}>
                 {data.kpis.fleetUtilization}%
               </div>
               <p style={{ fontSize: 11, color: "var(--subtle)", marginTop: 6 }}>
@@ -333,7 +333,7 @@ export default function AnalyticsClient() {
                 </span>
                 <DollarSign style={{ width: 14, height: 14, color: "#F59E0B" }} />
               </div>
-              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "#fff", marginTop: 10 }}>
+              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "var(--foreground)", marginTop: 10 }}>
                 ₹{data.kpis.totalOperationalCost.toLocaleString()}
               </div>
               <p style={{ fontSize: 11, color: "var(--subtle)", marginTop: 6 }}>
@@ -349,7 +349,7 @@ export default function AnalyticsClient() {
                 </span>
                 <TrendingUp style={{ width: 14, height: 14, color: "var(--foreground)" }} />
               </div>
-              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "#fff", marginTop: 10 }}>
+              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "var(--foreground)", marginTop: 10 }}>
                 {data.kpis.avgFleetRoi}%
               </div>
               <p style={{ fontSize: 11, color: "var(--subtle)", marginTop: 6 }}>
@@ -362,7 +362,7 @@ export default function AnalyticsClient() {
           <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 16 }}>
             {/* Chart 1: Monthly Revenue */}
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: 16 }}>
-              <h3 style={{ fontSize: 12, fontWeight: 600, color: "#fff", marginBottom: 16 }}>
+              <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)", marginBottom: 16 }}>
                 Monthly Revenue (Approximated)
               </h3>
               <div style={{ width: "100%", height: 200 }}>
@@ -374,7 +374,7 @@ export default function AnalyticsClient() {
                     <Tooltip 
                       contentStyle={{ background: "var(--surface-elevated)", border: "1px solid var(--border-strong)", borderRadius: 6, fontSize: 11 }}
                       labelStyle={{ color: "var(--muted)" }}
-                      itemStyle={{ color: "#fff" }}
+                      itemStyle={{ color: "var(--foreground)" }}
                     />
                     <Bar dataKey="revenue" fill="var(--status-blue)" radius={[4, 4, 0, 0]} barSize={24} />
                   </BarChart>
@@ -384,7 +384,7 @@ export default function AnalyticsClient() {
 
             {/* Chart 2: Top Costliest Vehicles */}
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: 16 }}>
-              <h3 style={{ fontSize: 12, fontWeight: 600, color: "#fff", marginBottom: 16 }}>
+              <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)", marginBottom: 16 }}>
                 Top Costliest Vehicles
               </h3>
               <div style={{ width: "100%", height: 200 }}>
@@ -400,7 +400,7 @@ export default function AnalyticsClient() {
                     <Tooltip 
                       contentStyle={{ background: "var(--surface-elevated)", border: "1px solid var(--border-strong)", borderRadius: 6, fontSize: 11 }}
                       labelStyle={{ color: "var(--muted)" }}
-                      itemStyle={{ color: "#fff" }}
+                      itemStyle={{ color: "var(--foreground)" }}
                     />
                     <Bar dataKey="cost" fill="var(--status-neutral)" radius={[0, 4, 4, 0]} barSize={16} />
                   </BarChart>
@@ -411,7 +411,7 @@ export default function AnalyticsClient() {
 
           {/* ── ROI Table ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>
               Vehicle ROI Performance Registry
             </h3>
             
@@ -435,7 +435,7 @@ export default function AnalyticsClient() {
                       <tr key={v.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                         <td>
                           <div>
-                            <div style={{ fontWeight: 600, color: "#fff" }}>{v.registrationNo}</div>
+                            <div style={{ fontWeight: 600, color: "var(--foreground)" }}>{v.registrationNo}</div>
                             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 1 }}>{v.name}</div>
                           </div>
                         </td>

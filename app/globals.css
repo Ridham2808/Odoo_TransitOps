@@ -71,6 +71,57 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+.light {
+  /* ── Surfaces ── */
+  --bg:               #F9FAFB;
+  --surface:          #FFFFFF;
+  --surface-elevated: #F3F4F6;
+  --surface-hover:    #E5E7EB;
+  --surface-active:   #D1D5DB;
+
+  /* ── Borders ── */
+  --border:        rgba(0, 0, 0, 0.08);
+  --border-subtle: rgba(0, 0, 0, 0.04);
+  --border-strong: rgba(0, 0, 0, 0.14);
+  --border-focus:  rgba(0, 0, 0, 0.35);
+
+  /* ── Text ── */
+  --foreground:  #111827;
+  --foreground-2: #374151;
+  --muted:       #6B7280;
+  --subtle:      #9CA3AF;
+  --placeholder: #D1D5DB;
+
+  /* ── Accent — black / slate ── */
+  --accent:        #111827;
+  --accent-hover:  #000000;
+  --accent-muted:  rgba(0, 0, 0, 0.05);
+  --accent-border: rgba(0, 0, 0, 0.12);
+
+  /* ── Status — functional only (matching dark theme status colors) ── */
+  --status-green:    #16A34A;
+  --status-green-bg: rgba(22, 163, 74, 0.08);
+
+  --status-blue:    #2563EB;
+  --status-blue-bg: rgba(37, 99, 235, 0.08);
+
+  --status-neutral:    #4B5563;
+  --status-neutral-bg: rgba(75, 85, 99, 0.08);
+
+  --status-red:    #DC2626;
+  --status-red-bg: rgba(220, 38, 38, 0.08);
+
+  /* ── Sidebar ── */
+  --sidebar-bg:             #FFFFFF;
+  --sidebar-border:         rgba(0, 0, 0, 0.06);
+  --sidebar-item-hover:     rgba(0, 0, 0, 0.03);
+  --sidebar-item-active-bg: rgba(0, 0, 0, 0.06);
+  --sidebar-item-active:    #111827;
+
+  /* ── Topbar ── */
+  --topbar-bg:     rgba(249, 250, 251, 0.92);
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    BASE RESET
    ════════════════════════════════════════════════════════════════════════════ */

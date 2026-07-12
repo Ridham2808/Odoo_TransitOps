@@ -116,6 +116,44 @@ export default function DriversClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const handleGlobalSearch = (e) => {
+      setSearchQuery(e.detail || "");
+    };
+    window.addEventListener("global-search", handleGlobalSearch);
+    return () => window.removeEventListener("global-search", handleGlobalSearch);
+  }, []);
+
+  // Sorting states
+  const [sortField, setSortField] = useState("");
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const renderSortHeader = (field, label) => {
+    const isSorted = sortField === field;
+    const arrow = isSorted ? (sortDirection === "asc" ? " ↑" : " ↓") : "";
+    return (
+      <th
+        onClick={() => handleSort(field)}
+        style={{ cursor: "pointer", userSelect: "none" }}
+        className="hover-text-white"
+      >
+        <span style={{ display: "inline-flex", alignItems: "center" }}>
+          {label}
+          <span style={{ fontSize: 10, color: "var(--muted)", marginLeft: 4 }}>{arrow}</span>
+        </span>
+      </th>
+    );
+  };
+
   // Format date display
   const formatDate = (dateStr) => {
     if (!dateStr) return "—";
@@ -340,6 +378,20 @@ export default function DriversClient() {
     );
   });
 
+  const sortedDrivers = [...filteredDrivers].sort((a, b) => {
+    if (!sortField) return 0;
+    let aVal = a[sortField];
+    let bVal = b[sortField];
+    if (aVal === undefined || aVal === null) return 1;
+    if (bVal === undefined || bVal === null) return -1;
+    if (typeof aVal === "string") {
+      return sortDirection === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+  });
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* ── Header ── */}
@@ -430,14 +482,14 @@ export default function DriversClient() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Driver</th>
-              <th>License No.</th>
-              <th>Category</th>
-              <th>Expiry Date</th>
-              <th>Contact No.</th>
-              <th>Trip Completion %</th>
-              <th>Safety Score</th>
-              <th>Status</th>
+              {renderSortHeader("name", "Driver")}
+              {renderSortHeader("licenseNumber", "License No.")}
+              {renderSortHeader("licenseCategory", "Category")}
+              {renderSortHeader("licenseExpiry", "Expiry Date")}
+              {renderSortHeader("contactNumber", "Contact No.")}
+              {renderSortHeader("completionRate", "Trip Completion %")}
+              {renderSortHeader("safetyScore", "Safety Score")}
+              {renderSortHeader("status", "Status")}
               {isEditAllowed && <th style={{ textAlign: "right" }}>Actions</th>}
             </tr>
           </thead>
@@ -449,14 +501,14 @@ export default function DriversClient() {
                   Loading driver profiles...
                 </td>
               </tr>
-            ) : filteredDrivers.length === 0 ? (
+            ) : sortedDrivers.length === 0 ? (
               <tr>
                 <td colSpan={isEditAllowed ? 9 : 8} style={{ textAlign: "center", padding: "40px 0", color: "var(--muted)" }}>
                   No drivers found.
                 </td>
               </tr>
             ) : (
-              filteredDrivers.map((d) => {
+              sortedDrivers.map((d) => {
                 const expired = isExpired(d.licenseExpiry);
                 const isSelected = selectedDriver?.id === d.id;
 
@@ -471,7 +523,7 @@ export default function DriversClient() {
                       transition: "background 150ms",
                     }}
                   >
-                    <td style={{ fontWeight: 600, color: "#fff" }}>{d.name}</td>
+                    <td style={{ fontWeight: 600, color: "var(--foreground)" }}>{d.name}</td>
                     <td>{d.licenseNumber}</td>
                     <td>
                       <span style={{ fontSize: 11, background: "rgba(255,255,255,0.03)", padding: "2px 6px", borderRadius: 4, border: "1px solid var(--border)" }}>
@@ -588,7 +640,7 @@ export default function DriversClient() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B" }} />
-            <span style={{ fontSize: 12, color: "#fff" }}>
+            <span style={{ fontSize: 12, color: "var(--foreground)" }}>
               Toggle status for <strong style={{ color: "var(--status-blue)" }}>{selectedDriver.name}</strong>
             </span>
             <span style={{ fontSize: 11, color: "var(--subtle)" }}>
@@ -666,7 +718,7 @@ export default function DriversClient() {
                 borderBottom: "1px solid var(--border)",
               }}
             >
-              <h2 style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)" }}>
                 {editingDriver ? "Edit Driver Profile" : "Register New Driver"}
               </h2>
               <button
@@ -843,12 +895,12 @@ export default function DriversClient() {
               padding: 20,
             }}
           >
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 10 }}>
+            <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)", marginBottom: 10 }}>
               Delete Driver Profile?
             </h2>
             <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, marginBottom: 20 }}>
               Are you sure you want to delete driver{" "}
-              <strong style={{ color: "#fff" }}>{driverToDelete.name}</strong>? This action cannot be
+              <strong style={{ color: "var(--foreground)" }}>{driverToDelete.name}</strong>? This action cannot be
               undone, and will fail if the driver is linked to active trips.
             </p>
 
