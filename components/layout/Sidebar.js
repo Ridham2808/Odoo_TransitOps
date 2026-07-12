@@ -2,27 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
+import {
+  LayoutDashboard, Truck, Users, Route, Wrench,
+  Fuel, BarChart2, Settings, X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/userContext";
 import { canView, canEdit } from "@/lib/permissions";
-import LordIcon from "@/components/ui/LordIcon";
+import TruckIcon from "@/components/ui/TruckIcon";
 
-// Map every nav item to its permission section key + Lordicon icon name
 const NAV_ITEMS = [
-  { label: "Dashboard",       href: "/dashboard",   icon: "dashboard",   section: "dashboard"   },
-  { label: "Fleet",           href: "/fleet",        icon: "truck",       section: "fleet"       },
-  { label: "Drivers",         href: "/drivers",      icon: "users",       section: "drivers"     },
-  { label: "Trips",           href: "/trips",        icon: "route",       section: "trips"       },
-  { label: "Maintenance",     href: "/maintenance",  icon: "wrench",      section: "maintenance" },
-  { label: "Fuel & Expenses", href: "/fuel",         icon: "fuel",        section: "fuel"        },
-  { label: "Analytics",       href: "/analytics",    icon: "analytics",   section: "analytics"   },
-  { label: "Settings",        href: "/settings",     icon: "settings",    section: "settings"    },
+  { label: "Dashboard",       href: "/dashboard",   icon: LayoutDashboard, section: "dashboard"   },
+  { label: "Fleet",           href: "/fleet",        icon: Truck,           section: "fleet",   animated: true },
+  { label: "Drivers",         href: "/drivers",      icon: Users,           section: "drivers"     },
+  { label: "Trips",           href: "/trips",        icon: Route,           section: "trips"       },
+  { label: "Maintenance",     href: "/maintenance",  icon: Wrench,          section: "maintenance" },
+  { label: "Fuel & Expenses", href: "/fuel",         icon: Fuel,            section: "fuel"        },
+  { label: "Analytics",       href: "/analytics",    icon: BarChart2,       section: "analytics"   },
+  { label: "Settings",        href: "/settings",     icon: Settings,        section: "settings"    },
 ];
 
 export default function Sidebar({ mobileOpen, onClose }) {
   const pathname = usePathname();
-  const { role, name, loading } = useUser();
+  const { role, name } = useUser();
 
   return (
     <>
@@ -38,14 +40,14 @@ export default function Sidebar({ mobileOpen, onClose }) {
       <aside className={cn("sidebar", mobileOpen && "open")}>
         {/* ── Logo ── */}
         <div className="sidebar-logo">
+        {/* Logo uses the animated truck icon */}
           <div style={{
             width: 28, height: 28, borderRadius: 7,
             background: "#fff",
             display: "flex", alignItems: "center", justifyContent: "center",
             flexShrink: 0,
           }}>
-            <LordIcon
-              name="zap"
+            <TruckIcon
               size={16}
               trigger="loop"
               colors="primary:#000000,secondary:#333333"
@@ -80,6 +82,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
               : pathname.startsWith(item.href);
 
             const viewOnly = role && canView(role, item.section) && !canEdit(role, item.section);
+            const Icon = item.icon;
 
             return (
               <Link
@@ -89,21 +92,21 @@ export default function Sidebar({ mobileOpen, onClose }) {
                 className={cn("sidebar-item", isActive && "active")}
                 title={viewOnly ? `${item.label} (view only)` : item.label}
               >
-                <LordIcon
-                  name={item.icon}
-                  size={16}
-                  trigger={isActive ? "loop" : "hover"}
-                  colors={
-                    isActive
-                      ? "primary:#ffffff,secondary:#aaaaaa"
-                      : "primary:#555555,secondary:#333333"
-                  }
-                />
+                {/* Truck uses animated Lordicon, others use lucide */}
+                {item.animated ? (
+                  <TruckIcon size={16} trigger="hover" isActive={isActive} />
+                ) : (
+                  <Icon style={{
+                    width: 16, height: 16, flexShrink: 0,
+                    color: isActive ? "#fff" : "var(--muted)",
+                    transition: "color var(--t)",
+                  }} />
+                )}
 
                 <span style={{ flex: 1, letterSpacing: "-0.01em" }}>{item.label}</span>
 
                 {viewOnly && !isActive && (
-                  <span title="View only" style={{
+                  <span style={{
                     width: 5, height: 5, borderRadius: "50%",
                     background: "var(--subtle)", flexShrink: 0, opacity: 0.5,
                   }} />

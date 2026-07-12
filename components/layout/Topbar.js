@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { Search, Bell, ChevronDown, LogOut } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/userContext";
 import { ROLE_LABELS } from "@/lib/permissions";
-import LordIcon from "@/components/ui/LordIcon";
 
 export default function Topbar({ onMenuClick }) {
   const router                  = useRouter();
@@ -39,15 +39,23 @@ export default function Topbar({ onMenuClick }) {
         aria-label="Open sidebar"
         style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: 4, display: "flex" }}
       >
-        <LordIcon name="menu" size={18} trigger="click" colors="primary:#888888,secondary:#555555" />
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
+        </svg>
       </button>
 
       {/* Search */}
-      <div className="search-input-wrap hidden sm:flex">
-        <LordIcon name="search" size={13} trigger="hover" colors="primary:#555555,secondary:#333333"
-          style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+      <div className="search-input-wrap hidden sm:flex" style={{ position: "relative" }}>
+        <Search style={{
+          width: 13, height: 13, color: "var(--subtle)",
+          position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none",
+        }} />
+        <input
+          type="search"
+          placeholder="Search…"
+          aria-label="Global search"
+          style={{ paddingLeft: 30 }}
         />
-        <input type="search" placeholder="Search…" aria-label="Global search" style={{ paddingLeft: 30 }} />
       </div>
 
       {/* Right side */}
@@ -59,12 +67,12 @@ export default function Topbar({ onMenuClick }) {
           style={{
             width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center",
             background: "none", border: "1px solid transparent", borderRadius: 6, cursor: "pointer",
-            transition: "all var(--t)",
+            color: "var(--muted)", transition: "all var(--t)",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--surface-hover)"; e.currentTarget.style.borderColor = "var(--border)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "none"; e.currentTarget.style.borderColor = "transparent"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--surface-hover)"; e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--foreground)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "none"; e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.color = "var(--muted)"; }}
         >
-          <LordIcon name="bell" size={16} trigger="hover" colors="primary:#555555,secondary:#333333" />
+          <Bell style={{ width: 15, height: 15 }} />
         </button>
 
         {/* Divider */}
@@ -92,7 +100,6 @@ export default function Topbar({ onMenuClick }) {
               border: "1px solid rgba(255,255,255,0.14)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 10, fontWeight: 700, color: "#fff", flexShrink: 0,
-              letterSpacing: 0,
             }}>
               {initials}
             </div>
@@ -109,13 +116,11 @@ export default function Topbar({ onMenuClick }) {
               )}
             </div>
 
-            <LordIcon
-              name="chevronDown"
-              size={12}
-              trigger="hover"
-              colors="primary:#555555,secondary:#333333"
-              style={{ transform: dropOpen ? "rotate(180deg)" : "none", transition: "transform var(--t)" }}
-            />
+            <ChevronDown style={{
+              width: 12, height: 12, color: "var(--subtle)",
+              transform: dropOpen ? "rotate(180deg)" : "none",
+              transition: "transform var(--t)",
+            }} />
           </button>
 
           {/* Dropdown */}
@@ -149,7 +154,6 @@ export default function Topbar({ onMenuClick }) {
                     <div style={{ fontSize: 11, color: "var(--subtle)", marginTop: 1 }}>{email}</div>
                   </div>
                 </div>
-                {/* Role pill */}
                 <span style={{
                   fontSize: 10, fontWeight: 600, color: "var(--muted)",
                   letterSpacing: "0.05em", textTransform: "uppercase",
@@ -172,12 +176,11 @@ export default function Topbar({ onMenuClick }) {
                     background: "none", border: "none", cursor: "pointer",
                     fontSize: 12, color: "var(--status-red)",
                     textAlign: "left", transition: "background var(--t)",
-                    letterSpacing: "-0.01em",
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(248,113,113,0.08)")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
                 >
-                  <LordIcon name="logout" size={14} trigger="hover" colors="primary:#F87171,secondary:#cc5555" />
+                  <LogOut style={{ width: 13, height: 13 }} />
                   Sign out
                 </button>
               </div>

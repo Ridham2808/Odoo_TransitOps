@@ -6,8 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
+import { Eye, EyeOff, AlertTriangle, ArrowRight } from "lucide-react";
 import Spinner from "@/components/ui/Spinner";
-import LordIcon from "@/components/ui/LordIcon";
+import TruckIcon from "@/components/ui/TruckIcon";
 
 const ROLES = [
   { value: "FLEET_MANAGER",     label: "Fleet Manager"     },
@@ -138,7 +139,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 64 }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <LordIcon name="zap" size={16} trigger="loop" colors="primary:#000000,secondary:#333333" />
+            <TruckIcon size={18} trigger="loop" colors="primary:#000000,secondary:#333333" />
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.03em", color: "#fff", lineHeight: 1 }}>
@@ -212,7 +213,7 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 40 }}>
             <div style={{ width: 26, height: 26, borderRadius: 6, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <LordIcon name="zap" size={13} trigger="loop" colors="primary:#000000,secondary:#333333" />
+              <TruckIcon size={14} trigger="loop" colors="primary:#000000,secondary:#333333" />
             </div>
             <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.02em", color: "#fff" }}>TransitOps</span>
           </div>
@@ -239,9 +240,7 @@ export default function LoginPage() {
                 marginBottom:  20,
               }}
             >
-              <LordIcon name="alert" size={16} trigger="loop" colors="primary:#F87171,secondary:#cc5555"
-                style={{ flexShrink: 0, marginTop: 1 }}
-              />
+              <AlertTriangle style={{ width: 14, height: 14, color: "var(--status-red)", flexShrink: 0, marginTop: 1 }} />
               <div>
                 <p style={{ fontSize: 12, color: "var(--status-red)", lineHeight: 1.5 }}>
                   {authError}
@@ -305,12 +304,10 @@ export default function LoginPage() {
                   onMouseEnter={(e) => (e.currentTarget.style.color = "var(--muted)")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "var(--subtle)")}
                 >
-                  <LordIcon
-                    name={showPass ? "eyeOff" : "eye"}
-                    size={16}
-                    trigger="click"
-                    colors="primary:#555555,secondary:#333333"
-                  />
+                  {showPass
+                    ? <EyeOff style={{ width: 14, height: 14 }} />
+                    : <Eye    style={{ width: 14, height: 14 }} />
+                  }
                 </button>
               </div>
             </Field>
@@ -363,7 +360,7 @@ export default function LoginPage() {
               {loading ? (
                 <><Spinner size={14} /> Signing in…</>
               ) : (
-                <>Sign In <LordIcon name="arrowRight" size={14} trigger="hover" colors="primary:#000000,secondary:#333333" /></>
+                <>Sign In <ArrowRight style={{ width: 14, height: 14 }} /></>
               )}
             </button>
           </form>

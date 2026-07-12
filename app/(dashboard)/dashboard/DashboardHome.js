@@ -2,19 +2,21 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import {
+  Truck, Zap, Wrench, Route, Activity, Users, TrendingUp, RefreshCw, ChevronDown,
+} from "lucide-react";
 import { useUser } from "@/lib/userContext";
 import StatusBadge from "@/components/ui/StatusBadge";
-import LordIcon, { LORDICON } from "@/components/ui/LordIcon";
 
 // ── KPI card config ────────────────────────────────────────────────────────
 const KPI_CONFIG = [
-  { key: "activeVehicles",    label: "Active Vehicles",    icon: "truck",     accent: "var(--status-blue)"    },
-  { key: "availableVehicles", label: "Available Vehicles",  icon: "zap",       accent: "var(--status-green)"   },
-  { key: "inMaintenance",     label: "In Maintenance",      icon: "wrench",    accent: "var(--status-neutral)" },
-  { key: "activeTrips",       label: "Active Trips",        icon: "route",     accent: "var(--status-blue)"    },
-  { key: "pendingTrips",      label: "Pending Trips",       icon: "activity",  accent: "var(--status-neutral)" },
-  { key: "driversOnDuty",     label: "Drivers On Duty",     icon: "users",     accent: "var(--status-green)"   },
-  { key: "fleetUtilization",  label: "Fleet Utilization",   icon: "trendUp",   accent: "#fff"                  },
+  { key: "activeVehicles",    label: "Active Vehicles",    Icon: Truck,      accent: "var(--status-blue)"    },
+  { key: "availableVehicles", label: "Available Vehicles",  Icon: Zap,        accent: "var(--status-green)"   },
+  { key: "inMaintenance",     label: "In Maintenance",      Icon: Wrench,     accent: "var(--status-neutral)" },
+  { key: "activeTrips",       label: "Active Trips",        Icon: Route,      accent: "var(--status-blue)"    },
+  { key: "pendingTrips",      label: "Pending Trips",       Icon: Activity,   accent: "var(--status-neutral)" },
+  { key: "driversOnDuty",     label: "Drivers On Duty",     Icon: Users,      accent: "var(--status-green)"   },
+  { key: "fleetUtilization",  label: "Fleet Utilization",   Icon: TrendingUp, accent: "#fff"                  },
 ];
 
 // ── Status bar config ──────────────────────────────────────────────────────
@@ -45,7 +47,7 @@ function Skel({ w = "100%", h = 14, radius = 4, style = {} }) {
 }
 
 // ── KPI Card ──────────────────────────────────────────────────────────────
-function KpiCard({ label, value, icon, accent, loading, isPercent }) {
+function KpiCard({ label, value, Icon, accent, loading, isPercent }) {
   return (
     <div
       style={{
@@ -77,13 +79,7 @@ function KpiCard({ label, value, icon, accent, loading, isPercent }) {
           border: "1px solid rgba(255,255,255,0.07)",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
-          <LordIcon
-            name={icon}
-            size={14}
-            trigger="loop"
-            colors={`primary:${accent},secondary:${accent}88`}
-            style={{ opacity: loading ? 0.3 : 1 }}
-          />
+          <Icon style={{ width: 11, height: 11, color: accent, opacity: loading ? 0.3 : 1 }} />
         </div>
       </div>
 
@@ -137,16 +133,11 @@ function FilterSelect({ label, value, onChange, options }) {
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
-        <LordIcon
-          name="chevronDown"
-          size={11}
-          trigger="hover"
-          colors="primary:#555555,secondary:#333333"
-          style={{
-            position: "absolute", right: 7, top: "50%",
-            transform: "translateY(-50%)", pointerEvents: "none",
-          }}
-        />
+        <ChevronDown style={{
+          position: "absolute", right: 7, top: "50%",
+          transform: "translateY(-50%)",
+          width: 11, height: 11, color: "var(--subtle)", pointerEvents: "none",
+        }} />
       </div>
     </div>
   );
