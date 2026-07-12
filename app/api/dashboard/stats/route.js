@@ -3,8 +3,12 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireView } from "@/lib/apiAuth";
 
 export async function GET(request) {
+  const guard = requireView(request, "dashboard");
+  if (guard) return guard;
+
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
