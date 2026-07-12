@@ -209,12 +209,7 @@ export default function DashboardHome() {
           onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.background = "var(--surface-hover)"; e.currentTarget.style.color = "var(--foreground)"; } }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "var(--surface)"; e.currentTarget.style.color = "var(--muted)"; }}
         >
-          <LordIcon
-            name="refresh"
-            size={14}
-            trigger={loading ? "loop" : "hover"}
-            colors="primary:#888888,secondary:#555555"
-          />
+          <RefreshCw style={{ width: 11, height: 11, animation: loading ? "spin 1s linear infinite" : "none" }} />
           Refresh
         </button>
       </div>
