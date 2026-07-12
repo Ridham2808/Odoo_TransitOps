@@ -152,40 +152,41 @@ export default function LoginPage() {
         </div>
 
         {/* Headline */}
-        <h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.15, color: "#fff", marginBottom: 14 }}>
-          One login,<br />
-          <span style={{ color: "var(--subtle)" }}>four roles.</span>
+        <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.25, color: "#fff", marginBottom: 10 }}>
+          Eliminate Fleet Downtime & Operational Leakages
         </h1>
-        <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.65, marginBottom: 40, maxWidth: 280 }}>
-          Access is scoped the moment you sign in. No extra steps.
+        <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6, marginBottom: 30, maxWidth: 300 }}>
+          TransitOps is a unified control room built to streamline dispatching, plug expense leaks, and automate compliance audits.
         </p>
 
-        {/* Role cards */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* Feature/Problem solving blocks */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           {[
-            { role: "Fleet Manager",     scope: "Fleet & Maintenance" },
-            { role: "Dispatcher",        scope: "Dashboard & Trips"    },
-            { role: "Safety Officer",    scope: "Drivers & Compliance" },
-            { role: "Financial Analyst", scope: "Fuel, Expenses & Analytics" },
-          ].map(({ role, scope }) => (
-            <div
-              key={role}
-              style={{
-                display:       "flex",
-                alignItems:    "center",
-                justifyContent:"space-between",
-                padding:       "9px 12px",
-                borderRadius:   6,
-                background:    "rgba(255,255,255,0.03)",
-                border:        "1px solid rgba(255,255,255,0.06)",
-              }}
-            >
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground-2)", letterSpacing: "-0.01em" }}>
-                {role}
+            {
+              title: "Smart Capacity & Dispatching",
+              desc: "Checks cargo weight limits, prevents double-bookings, and blocks out-of-service assets automatically.",
+            },
+            {
+              title: "Compliance & Expiry Safeguards",
+              desc: "Monitors driver license expirations and blocks expired or suspended drivers from dispatch assignments.",
+            },
+            {
+              title: "Automated Shop Syncing",
+              desc: "Transitions vehicles to 'In Shop' on service logs and auto-restores to 'Available' once complete.",
+            },
+            {
+              title: "Operational Cost Audits",
+              desc: "Sums fuel logs, toll bills, and maintenance invoices live to track exact profit margins per vehicle.",
+            },
+          ].map(({ title, desc }) => (
+            <div key={title} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B" }} />
+                {title}
               </span>
-              <span style={{ fontSize: 11, color: "var(--subtle)" }}>
-                {scope}
-              </span>
+              <p style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.5, paddingLeft: 12 }}>
+                {desc}
+              </p>
             </div>
           ))}
         </div>
