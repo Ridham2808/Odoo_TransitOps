@@ -29,7 +29,11 @@ export async function GET(request) {
   try {
     assertView(user.role, "fleet");
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 403 });
+    try {
+      assertView(user.role, "trips");
+    } catch {
+      return NextResponse.json({ error: err.message }, { status: 403 });
+    }
   }
 
   const { searchParams } = request.nextUrl;
