@@ -323,33 +323,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Bottom note */}
-          <div
-            style={{
-              marginTop: 24,
-              padding: "14px",
-              borderRadius: 8,
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <p style={{ fontSize: 11, color: "var(--subtle)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 500 }}>
-              Role-based access
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {[
-                ["Fleet Manager",     "Full CRUD across all modules"],
-                ["Dispatcher",        "Trips, Fleet view, Fuel logs"],
-                ["Safety Officer",    "Drivers, Maintenance"],
-                ["Financial Analyst", "Expenses & Analytics read"],
-              ].map(([r, s]) => (
-                <div key={r} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                  <span style={{ fontSize: 11, color: "var(--muted)" }}>{r}</span>
-                  <span style={{ fontSize: 11, color: "var(--subtle)" }}>{s}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
